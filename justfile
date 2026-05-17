@@ -54,6 +54,11 @@ sync-all:
     cd '{{justfile_directory()}}'; \
     uv run python -c "import asyncio; from ag_gazebo_bridge.server import fleet_sync_all; print(asyncio.run(fleet_sync_all()))"
 
+# Start full stack (backend + Vite dashboard)
+dev:
+    cd '{{justfile_directory()}}\web_sota'
+    .\start.ps1
+
 # ── Utilities ─────────────────────────────────────────────────────────────────
 
 mcpb-pack:

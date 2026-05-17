@@ -1,9 +1,0 @@
-README.md
-pyproject.toml
-src/ag_gazebo_bridge/server.py
-src/ag_gazebo_bridge.egg-info/PKG-INFO
-src/ag_gazebo_bridge.egg-info/SOURCES.txt
-src/ag_gazebo_bridge.egg-info/dependency_links.txt
-src/ag_gazebo_bridge.egg-info/entry_points.txt
-src/ag_gazebo_bridge.egg-info/requires.txt
-src/ag_gazebo_bridge.egg-info/top_level.txt

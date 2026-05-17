@@ -1,0 +1,28 @@
+{
+  "manifest_version": "0.2",
+  "name": "gazebo-mcp",
+  "version": "0.2.0",
+  "description": "Gazebo robotics simulation bridge to fleet mesh — control robots, sync scenes, export CAD.",
+  "author": { "name": "Sandra Schipal" },
+  "server": {
+    "type": "python",
+    "entry_point": "src/ag_gazebo_bridge/server.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": ["python", "-m", "ag_gazebo_bridge.server"],
+      "env": { "PYTHONUNBUFFERED": "1" }
+    }
+  },
+  "tools": [
+    { "name": "gz_topic_pub", "description": "Publish to a Gazebo simulation topic" },
+    { "name": "gz_topic_list", "description": "List active Gazebo topics" },
+    { "name": "gz_sim_state", "description": "List models in the Gazebo simulation" },
+    { "name": "gz_service_call", "description": "Call a Gazebo service" },
+    { "name": "sync_to_yahboom", "description": "Push Gazebo robot command to physical Yahboom" },
+    { "name": "sync_to_unity", "description": "Export Gazebo scene to Unity 3D" },
+    { "name": "sync_to_resonite", "description": "Spawn Gazebo models in Resonite VR" },
+    { "name": "sync_to_freecad", "description": "Export Gazebo model to FreeCAD" },
+    { "name": "fleet_sync_all", "description": "Broadcast to all connected fleet repos" },
+    { "name": "fleet_status", "description": "Health check all fleet repos" }
+  ]
+}

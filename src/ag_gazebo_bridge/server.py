@@ -14,17 +14,17 @@ Fleet bridges (REST API calls to connected repos):
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
 from typing import Annotated, Any
 
 from fastmcp import FastMCP
 from pydantic import Field
-
 import httpx
 
 log = logging.getLogger(__name__)
-mcp = FastMCP("ag-gazebo-bridge")
+mcp = FastMCP("gazebo-mcp")
 
 # ── Fleet port config (from WEBAPP_PORTS.md) ──────────────────────────────
 
@@ -69,7 +69,7 @@ async def _gz_run(*args: str) -> tuple[bool, str]:
         if proc.returncode == 0:
             return True, stdout.decode("utf-8", errors="replace").strip()
         return False, stderr.decode("utf-8", errors="replace").strip()
-    except asyncio.TimeoutError:
+    except TimeoutError:
         return False, "Gazebo command timed out"
     except FileNotFoundError:
         return False, "Gazebo not found — is gz (Gazebo Garden/Harmonic) installed and on PATH?"
@@ -146,7 +146,7 @@ async def sync_to_yahboom(
 
 @mcp.tool()
 async def sync_to_unity(
-    models: Annotated[list[str] | None, Field(description="List of Gazebo model names to sync. Defaults to all.")] = None,
+    models: Annotated[list[str] | None, Field(description="List of Gazebo models to sync. Defaults to all.")] = None,
 ) -> dict[str, Any]:
     """Sync Gazebo simulation models to Unity 3D visualization via unity3d-mcp."""
     url = FLEET_PORTS["unity3d"]
