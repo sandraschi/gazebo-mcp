@@ -1,5 +1,17 @@
 # gazebo-mcp
 
+<div align="center">
+
+**Robot simulation → AI agents. Bridge Gazebo to your fleet.**
+
+[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![FastMCP](https://img.shields.io/badge/FastMCP-3.2.0-blue?style=flat-square&logo=python&logoColor=white)](https://github.com/jlowin/fastmcp)
+[![License](https://img.shields.io/github/license/sandraschi/gazebo-mcp?style=flat-square&color=blue)](LICENSE)
+[![Built with Just](https://img.shields.io/badge/Built_with-Just-000000?style=flat-square&logo=gnu-bash&logoColor=white)](https://github.com/casey/just)
+[![uv](https://img.shields.io/badge/uv-000000?style=flat-square&logo=astral&logoColor=white)](https://docs.astral.sh/uv)
+
+</div>
+
 FastMCP 3.2 bridge from [Gazebo](https://gazebosim.org) robotics simulation to the fleet robotics mesh.
 
 > Gazebo is a **3D robotics simulator** — it's like a video game engine for robots. You spawn a virtual robot in a virtual world, give it physics, sensors, and cameras, then run AI agents against it. When your code works in simulation, you push it to the physical robot.
