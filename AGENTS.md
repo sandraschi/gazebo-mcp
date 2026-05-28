@@ -25,3 +25,5 @@ FastMCP 3.2 bridge from Gazebo simulation to the fleet robotics mesh.
 | unity3d-mcp | 10831 | 3D visualization |
 | resonite-mcp | 10979 | VR spatial sync |
 | freecad-mcp | 10945 | CAD model export |
+
+Install docs: follow mcp-central-docs/standards/AGENT_INSTALL_REFERENCE.md
