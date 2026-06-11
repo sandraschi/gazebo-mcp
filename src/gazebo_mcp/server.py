@@ -660,7 +660,6 @@ async def analyze_sim_logs(job_id: str, ctx: Context) -> dict:
     analyze_sim_logs(job_id="abc12345")
     """
     job_dir = _job_dir_for(job_id)
-    job_info = _jobs.get(job_id)
 
     stderr_text = ""
     log_path = job_dir / "runner.log"

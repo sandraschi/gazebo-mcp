@@ -101,5 +101,21 @@ See `mcp-central-docs/standards/rules/` for fleet conventions.
 ## Prerequisites
 
 - **Python 3.11+**
-- **Gazebo (Ignition)** — see https://gazebosim.org for install instructions
-- `gz sim` or `ign gazebo` on PATH
+- **Gazebo** — either natively on PATH (`gz` / `ign`) or, on Windows, inside the
+  **default WSL2 distro**. Native Windows Gazebo support is effectively
+  nonexistent; WSL2 is the supported path here and is auto-detected.
+
+### WSL2 mode (Windows)
+
+If `gz` is not on the Windows PATH, the server probes `wsl -e bash -lc "command -v gz"`
+and, on success, runs every Gazebo command as `wsl -e gz ...`. Depot paths are
+translated to `/mnt/<drive>/...` automatically. GUI mode (`headless=False`)
+renders through WSLg. `sim_status` reports the active mode in `gz_mode`
+(`native` / `wsl` / null).
+
+Install Gazebo in WSL2 Ubuntu: https://gazebosim.org/docs — verified against
+Gazebo 10.1.0 in Ubuntu/WSL2 (gz sim headless e2e, 2026-06-11).
+
+Caveat: `stop_sim` terminates the `wsl.exe` wrapper process; orphaned `gz`
+processes inside the distro are possible after hard kills — `wsl --terminate
+Ubuntu` is the big hammer.
