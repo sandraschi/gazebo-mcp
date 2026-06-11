@@ -4,6 +4,20 @@
 
 **Ports:** Backend 10991 / Frontend 10990
 
+**Version:** 0.2.0-alpha
+
+---
+
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Tools](#tools-14-total)
+- [Architecture](#architecture)
+- [Webapp](#webapp)
+- [Fleet Integration](#fleet-integration)
+- [Development](#development)
+- [Prerequisites](#prerequisites)
+
 ---
 
 ## Quick Start
@@ -24,24 +38,24 @@ Or use the start script:
 
 ---
 
-## Tools
+## Tools (14 total)
 
-| Tool | Description |
-|------|-------------|
-| `sim_status` | Health check — Gazebo CLI availability, version, depot stats |
-| `load_world` | Load an SDF world file into the depot |
-| `spawn_model` | Spawn a model into a running simulation via `gz service` |
-| `start_sim` | Launch a Gazebo simulation as a background subprocess |
-| `stop_sim` | Stop a running simulation |
-| `get_state` | Query simulation process state and metadata |
-| `apply_control` | Publish a command to a Gazebo topic via `gz topic` |
-| `list_worlds` | List all worlds in the depot |
-| `list_jobs` | List active and completed simulation jobs |
-| `agentic_sim_workflow` | Autonomous multi-step simulation workflow via LLM |
-| `natural_language_control` | Convert NL commands to topic payloads |
-| `analyze_sim_state` | Natural-language analysis of sim state |
-| `analyze_sim_logs` | Root-cause analysis from sim stderr |
-| `discover_model` | Suggest SDF/URDF model URLs from description |
+| # | Tool | Description |
+|---|------|-------------|
+| 1 | `sim_status` | Health check — Gazebo CLI availability, version, depot stats |
+| 2 | `load_world` | Load an SDF world file into the depot |
+| 3 | `spawn_model` | Spawn a model into a running simulation via `gz service` |
+| 4 | `start_sim` | Launch a Gazebo simulation as a background subprocess |
+| 5 | `stop_sim` | Stop a running simulation |
+| 6 | `get_state` | Query simulation process state and metadata |
+| 7 | `apply_control` | Publish a command to a Gazebo topic via `gz topic` |
+| 8 | `list_worlds` | List all worlds in the depot |
+| 9 | `list_jobs` | List active and completed simulation jobs |
+| 10 | `agentic_sim_workflow` | 🤖 Multi-step simulation orchestration via host LLM |
+| 11 | `natural_language_control` | 🎯 NL commands to topic payloads |
+| 12 | `analyze_sim_state` | 📊 NL analysis of sim state |
+| 13 | `analyze_sim_logs` | 🔍 Root-cause analysis from sim stderr |
+| 14 | `discover_model` | 🌐 Suggest SDF/URDF model URLs from description |
 
 ---
 
@@ -60,7 +74,7 @@ Each simulation runs as an isolated subprocess.
 
 ## Webapp
 
-Vite + React dashboard at **10990** with world depot browser, simulation control panel, and LLM interface.
+Vite + React dashboard at **10990** with pages: Dashboard, Simulations, Worlds, World Detail, Logging, LLM, Help.
 
 ---
 
@@ -77,6 +91,7 @@ Vite + React dashboard at **10990** with world depot browser, simulation control
 just lint              # ruff check
 just test              # pytest
 just dev               # backend + frontend with hot reload
+just e2e               # Playwright e2e tests (future)
 ```
 
 See `mcp-central-docs/standards/rules/` for fleet conventions.
