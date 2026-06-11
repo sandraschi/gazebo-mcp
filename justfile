@@ -1,3 +1,4 @@
+# === Fleet-standard ===
 bootstrap:
     uv sync
 
@@ -24,3 +25,13 @@ mcpb-pack:
 
 clean:
     pwsh -NoProfile -c "Remove-Item -Recurse -Force -Path dist,.venv,__pycache__ -ErrorAction SilentlyContinue"
+
+# === Repo-specific ===
+check-gazebo:
+    pwsh -NoProfile -c "if (Get-Command gz -ErrorAction SilentlyContinue) { gz sim --version } else { Write-Host 'Gazebo not installed' }"
+
+worlds:
+    uv run python -c "from pathlib import Path; p = Path('worlds'); print('Worlds:', [f.name for f in p.glob('*.sdf')]) if p.exists() else print('no worlds dir')"
+
+topics:
+    pwsh -NoProfile -c "if (Get-Command gz -ErrorAction SilentlyContinue) { gz topic -l } else { Write-Host 'Gazebo not running' }"
