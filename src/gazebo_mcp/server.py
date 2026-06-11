@@ -33,12 +33,50 @@ def _save_depot(depot: dict):
     DEPOT_FILE.write_text(json.dumps(depot, indent=2))
 
 
-def _find_gz() -> str | None:
+GZ_MODE: str | None = None  # cached by _find_gz(): "native" | "wsl" | None
+
+
+def _to_wsl_path(p) -> str:
+    """Translate a Windows path to its /mnt/<drive>/ WSL equivalent."""
+    pp = Path(p).resolve()
+    if not pp.drive:
+        return str(pp).replace("\\", "/")
+    drive = pp.drive.rstrip(":").lower()
+    rest = str(pp)[len(pp.drive):].replace("\\", "/")
+    return f"/mnt/{drive}{rest}"
+
+
+def _find_gz() -> list[str] | None:
+    """Return the gz command prefix: ['<gz>'] natively, or ['wsl', '-e', 'gz'] via WSL2.
+
+    Native Windows Gazebo support is effectively nonexistent; on Windows hosts
+    the supported path is Gazebo installed inside the default WSL2 distro.
+    GUI mode (headless=False) renders through WSLg. Sets module-level GZ_MODE.
+    """
+    global GZ_MODE
     for candidate in ["gz", "ign"]:
         which = shutil.which(candidate)
         if which:
-            return which
+            GZ_MODE = "native"
+            return [which]
+    if shutil.which("wsl"):
+        try:
+            r = subprocess.run(
+                ["wsl", "-e", "bash", "-lc", "command -v gz"],
+                capture_output=True, text=True, timeout=20,
+            )
+            if r.returncode == 0 and r.stdout.strip():
+                GZ_MODE = "wsl"
+                return ["wsl", "-e", "gz"]
+        except Exception:
+            pass
+    GZ_MODE = None
     return None
+
+
+def _gz_path(p) -> str:
+    """A filesystem path as the gz process will see it (WSL-translated when applicable)."""
+    return _to_wsl_path(p) if GZ_MODE == "wsl" else str(p)
 
 
 def _detect_gz_version() -> str | None:
@@ -46,14 +84,10 @@ def _detect_gz_version() -> str | None:
     if not gz:
         return None
     try:
-        result = subprocess.run([gz, "sim", "--version"], capture_output=True, text=True, timeout=10)
+        result = subprocess.run([*gz, "sim", "--version"], capture_output=True, text=True, timeout=20)
         return result.stdout.strip() or result.stderr.strip() or "unknown"
     except Exception:
-        try:
-            result = subprocess.run(["ign", "gazebo", "--version"], capture_output=True, text=True, timeout=10)
-            return result.stdout.strip() or result.stderr.strip() or "unknown"
-        except Exception:
-            return "unknown"
+        return "unknown"
 
 
 # ---------------------------------------------------------------------------
@@ -74,6 +108,7 @@ def sim_status() -> dict:
     gz = _find_gz()
     return {
         "gz_available": gz is not None,
+        "gz_mode": GZ_MODE,
         "gz_path": gz,
         "gz_version": _detect_gz_version(),
         "world_dir_exists": WORLD_DIR.exists(),
@@ -149,7 +184,7 @@ def spawn_model(uri: str, name: str, world: str = "default") -> dict:
             except Exception as e:
                 return {"success": False, "error": f"Failed to download model: {e}"}
 
-    cmd = [gz, "service", f"/world/{world}/create", "--reqtype", "gz.msgs.EntityFactory", "--reptype", "gz.msgs.Boolean", "--timeout", "10000", "--req", f"{{sdf_filename: '{model_path}', name: '{name}'}}"]
+    cmd = [*gz, "service", f"/world/{world}/create", "--reqtype", "gz.msgs.EntityFactory", "--reptype", "gz.msgs.Boolean", "--timeout", "10000", "--req", f"{{sdf_filename: '{_gz_path(model_path)}', name: '{name}'}}"]
 
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
@@ -187,15 +222,21 @@ def start_sim(world_name: str, headless: bool = True, extra_args: str = "") -> d
 
     job_id = uuid.uuid4().hex[:8]
 
-    cmd = [gz, "sim", depot[world_name]["path"]]
+    cmd = [*gz, "sim", _gz_path(depot[world_name]["path"])]
     if headless:
         cmd.append("-s")
     if extra_args:
         cmd.extend(extra_args.split())
 
+    job_dir = JOBS_DIR / job_id
+    job_dir.mkdir(parents=True, exist_ok=True)
+    # Log to file, never PIPE: undrained pipes deadlock chatty sims.
+    log_path = job_dir / "runner.log"
+    log_fh = open(log_path, "w", encoding="utf-8")  # noqa: SIM115 — owned by child
     try:
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc = subprocess.Popen(cmd, stdout=log_fh, stderr=subprocess.STDOUT)
     except FileNotFoundError:
+        log_fh.close()
         return {"success": False, "error": f"Gazebo binary not found: {gz}"}
 
     _jobs[job_id] = {
@@ -203,11 +244,10 @@ def start_sim(world_name: str, headless: bool = True, extra_args: str = "") -> d
         "world_name": world_name,
         "headless": headless,
         "started_at": time.time(),
+        "log_path": str(log_path),
     }
 
-    job_dir = JOBS_DIR / job_id
-    job_dir.mkdir(parents=True, exist_ok=True)
-    meta = {"world_name": world_name, "headless": headless, "cmd": " ".join(cmd)}
+    meta = {"world_name": world_name, "headless": headless, "cmd": " ".join(cmd), "gz_mode": GZ_MODE}
     (job_dir / "metadata.json").write_text(json.dumps(meta, indent=2))
 
     time.sleep(2)
@@ -273,9 +313,10 @@ def get_state(job_id: str) -> dict:
     return_code = proc.poll() if proc and not running else None
 
     stderr_snippet = ""
-    if proc and proc.stderr and not running:
+    log_path = job_dir / "runner.log"
+    if not running and log_path.exists():
         try:
-            stderr_snippet = proc.stderr.read(1024).decode("utf-8", errors="replace")
+            stderr_snippet = log_path.read_text(encoding="utf-8", errors="replace")
         except Exception:
             pass
 
@@ -315,7 +356,7 @@ def apply_control(job_id: str, topic: str = "", command: str = "") -> dict:
         return {"success": False, "error": f"Job '{job_id}' not found"}
 
     if topic:
-        cmd = [gz, "topic", "-t", topic, "-m", "gz.msgs.Twist", "-p", command]
+        cmd = [*gz, "topic", "-t", topic, "-m", "gz.msgs.Twist", "-p", command]
         try:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
             success = result.returncode == 0
@@ -376,7 +417,7 @@ def list_jobs() -> dict:
             completed.append({
                 "job_id": job_dir.name,
                 "world_name": meta.get("world_name", "unknown"),
-                "completed": (job_dir / "stop.signal").exists(),
+                "stop_requested": (job_dir / "stop.signal").exists(),
             })
 
     return {
@@ -522,7 +563,7 @@ Example: {{"topic": "/model/vehicle/cmd_vel", "command": "linear: {{x: 0.5}}"}}"
 
     gz = _find_gz()
     if gz:
-        cmd = [gz, "topic", "-t", ctrl["topic"], "-m", "gz.msgs.Twist", "-p", ctrl.get("command", "")]
+        cmd = [*gz, "topic", "-t", ctrl["topic"], "-m", "gz.msgs.Twist", "-p", ctrl.get("command", "")]
         try:
             subprocess.run(cmd, capture_output=True, text=True, timeout=10)
         except Exception:
@@ -561,11 +602,13 @@ async def analyze_sim_state(job_id: str, ctx: Context) -> dict:
     running = proc is not None and proc.poll() is None
 
     stderr_text = ""
-    if proc and proc.stderr:
-        try:
-            stderr_text = proc.stderr.read(2048).decode("utf-8", errors="replace")
-        except Exception:
-            pass
+    if proc:
+        lp = JOBS_DIR / job_id / "runner.log"
+        if lp.exists():
+            try:
+                stderr_text = lp.read_text(encoding="utf-8", errors="replace")
+            except Exception:
+                pass
 
     state_summary = {
         "running": running,
@@ -620,18 +663,17 @@ async def analyze_sim_logs(job_id: str, ctx: Context) -> dict:
     job_info = _jobs.get(job_id)
 
     stderr_text = ""
-    if job_info and job_info.get("process"):
-        proc = job_info["process"]
-        if proc.stderr:
-            try:
-                stderr_text = proc.stderr.read().decode("utf-8", errors="replace")
-            except Exception:
-                pass
+    log_path = job_dir / "runner.log"
+    if log_path.exists():
+        try:
+            stderr_text = log_path.read_text(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
 
     if not stderr_text:
-        completed = (job_dir / "stop.signal").exists()
+        stop_requested = (job_dir / "stop.signal").exists()
         return {"success": True, "message": "No errors in log output.",
-                "analysis": f"Job {job_id}: {'stopped' if completed else 'still running or unknown'}. No error logs found."}
+                "analysis": f"Job {job_id}: {'stop was requested' if stop_requested else 'still running or unknown'}. No error logs found."}
 
     log_prompt = f"""You are a robotics debug engineer. Given these Gazebo simulation logs, diagnose any issues.
 
