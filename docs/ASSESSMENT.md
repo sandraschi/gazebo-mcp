@@ -39,3 +39,13 @@ empty SDF world loaded via translated `/mnt/d/...` path, `gz sim -s` ran stable
 
 One live session testing spawn_model + apply_control; decide whether
 joint-state parity (gz topic echo bridge) is worth it; commit; mcpb pack.
+
+---
+
+## Update 2026-06-12 (post OpenCode pass)
+
+Pushed to GitHub (main). OpenCode added 7 Playwright fleet-audit e2e tests
+(web_sota/e2e). WSL2 mode, logfile capture, and stop_requested semantics all
+in HEAD. worlds/ now gitignored (empty_world.sdf is runtime-seeded).
+hatchling packaging added. FLEET_INDEX entry added (10991/10990). Open items
+unchanged: live gz topic/service session, joint-state parity decision.
