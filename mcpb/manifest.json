@@ -1,0 +1,20 @@
+{
+  "manifest_version": "0.3",
+  "name": "gazebo-mcp",
+  "version": "0.2.0",
+  "description": "General-purpose Gazebo simulator wrapper via MCP",
+  "author": { "name": "Sandra Schipal", "url": "https://github.com/sandraschi" },
+  "repository": { "type": "git", "url": "https://github.com/sandraschi/gazebo-mcp.git" },
+  "homepage": "https://github.com/sandraschi/gazebo-mcp",
+  "license": "Apache 2.0",
+  "keywords": ["mcp", "model-context-protocol", "fastmcp", "gazebo", "simulation", "robotics"],
+  "server": {
+    "type": "python",
+    "entry_point": "src/gazebo_mcp/server.py",
+    "mcp_config": {
+      "command": "python",
+      "args": ["-m", "gazebo_mcp"],
+      "env": { "PYTHONPATH": "${__dirname}/src", "PYTHONUNBUFFERED": "1" }
+    }
+  }
+}
