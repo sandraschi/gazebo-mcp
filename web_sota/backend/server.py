@@ -1,6 +1,7 @@
 """FastAPI backend for the gazebo-mcp web dashboard."""
 
 import sys
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
@@ -11,8 +12,22 @@ from fastapi.staticfiles import StaticFiles
 
 from gazebo_mcp.server import sim_status, list_worlds, list_jobs, load_world, start_sim, stop_sim, get_state
 from web_sota.backend.routes.ai import router as ai_router
+from web_sota.backend.routes.logging import router as logging_router
+from web_sota.backend.log_buffer import activity_log
 
-app = FastAPI(title="gazebo-mcp")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.activity_log = activity_log
+    log_dir = Path(__file__).resolve().parent.parent.parent / "logs"
+    log_dir.mkdir(exist_ok=True)
+    activity_log.start_file_watch(log_dir / "server.log")
+    activity_log.info("server", "Server started")
+    yield
+    activity_log.info("server", "Server stopped")
+
+
+app = FastAPI(title="gazebo-mcp", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,6 +37,7 @@ app.add_middleware(
 )
 
 app.include_router(ai_router)
+app.include_router(logging_router)
 
 
 @app.get("/health")
