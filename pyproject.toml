@@ -1,12 +1,15 @@
 [project]
 name = "gazebo-mcp"
 version = "0.2.0"
-description = "General-purpose Gazebo simulator wrapper via MCP"
+description = "Gazebo simulation via MCP simulation via MCP"
 requires-python = ">=3.11"
-dependencies = ["fastmcp>=3.2", "httpx>=0.28", "fastapi>=0.115", "uvicorn[standard]>=0.34"]
+dependencies = ["fastmcp>=3.2", "mujoco>=3.2", "httpx>=0.28", "fastapi>=0.115", "uvicorn[standard]>=0.34"]
 
 [project.scripts]
 gazebo-mcp = "gazebo_mcp:main"
+
+[dependency-groups]
+dev = ["pytest>=8", "pytest-asyncio>=0.24", "pytest-mock>=3", "httpx>=0.28"]
 
 [build-system]
 requires = ["hatchling"]
