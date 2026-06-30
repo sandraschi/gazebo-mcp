@@ -5,7 +5,6 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-import pytest
 from fastapi.testclient import TestClient
 
 from web_sota.backend.server import app
@@ -35,7 +34,9 @@ class TestAI:
         assert resp.status_code == 200
 
     def test_nl_control(self):
-        resp = client.post("/api/ai/nl-control", json={"prompt": "test", "job_id": "none"})
+        resp = client.post(
+            "/api/ai/nl-control", json={"prompt": "test", "job_id": "none"}
+        )
         assert resp.status_code == 200
 
     def test_analyze_state(self):

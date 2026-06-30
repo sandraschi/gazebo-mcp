@@ -42,7 +42,7 @@ def _to_wsl_path(p) -> str:
     if not pp.drive:
         return str(pp).replace("\\", "/")
     drive = pp.drive.rstrip(":").lower()
-    rest = str(pp)[len(pp.drive):].replace("\\", "/")
+    rest = str(pp)[len(pp.drive) :].replace("\\", "/")
     return f"/mnt/{drive}{rest}"
 
 
@@ -63,7 +63,9 @@ def _find_gz() -> list[str] | None:
         try:
             r = subprocess.run(
                 ["wsl", "-e", "bash", "-lc", "command -v gz"],
-                capture_output=True, text=True, timeout=20,
+                capture_output=True,
+                text=True,
+                timeout=20,
             )
             if r.returncode == 0 and r.stdout.strip():
                 GZ_MODE = "wsl"
@@ -84,7 +86,9 @@ def _detect_gz_version() -> str | None:
     if not gz:
         return None
     try:
-        result = subprocess.run([*gz, "sim", "--version"], capture_output=True, text=True, timeout=20)
+        result = subprocess.run(
+            [*gz, "sim", "--version"], capture_output=True, text=True, timeout=20
+        )
         return result.stdout.strip() or result.stderr.strip() or "unknown"
     except Exception:
         return "unknown"
@@ -114,7 +118,8 @@ def sim_status() -> dict:
         "world_dir_exists": WORLD_DIR.exists(),
         "worlds_in_depot": len(_load_depot()),
         "active_jobs": sum(
-            1 for j in _jobs.values()
+            1
+            for j in _jobs.values()
             if j.get("process") and j["process"].poll() is None
         ),
         "jobs_dir_exists": JOBS_DIR.exists(),
@@ -184,11 +189,29 @@ def spawn_model(uri: str, name: str, world: str = "default") -> dict:
             except Exception as e:
                 return {"success": False, "error": f"Failed to download model: {e}"}
 
-    cmd = [*gz, "service", f"/world/{world}/create", "--reqtype", "gz.msgs.EntityFactory", "--reptype", "gz.msgs.Boolean", "--timeout", "10000", "--req", f"{{sdf_filename: '{_gz_path(model_path)}', name: '{name}'}}"]
+    cmd = [
+        *gz,
+        "service",
+        f"/world/{world}/create",
+        "--reqtype",
+        "gz.msgs.EntityFactory",
+        "--reptype",
+        "gz.msgs.Boolean",
+        "--timeout",
+        "10000",
+        "--req",
+        f"{{sdf_filename: '{_gz_path(model_path)}', name: '{name}'}}",
+    ]
 
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-        return {"success": result.returncode == 0, "name": name, "world": world, "stdout": result.stdout, "stderr": result.stderr}
+        return {
+            "success": result.returncode == 0,
+            "name": name,
+            "world": world,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+        }
     except subprocess.TimeoutExpired:
         return {"success": False, "error": "Spawn timed out"}
     except Exception as e:
@@ -247,7 +270,12 @@ def start_sim(world_name: str, headless: bool = True, extra_args: str = "") -> d
         "log_path": str(log_path),
     }
 
-    meta = {"world_name": world_name, "headless": headless, "cmd": " ".join(cmd), "gz_mode": GZ_MODE}
+    meta = {
+        "world_name": world_name,
+        "headless": headless,
+        "cmd": " ".join(cmd),
+        "gz_mode": GZ_MODE,
+    }
     (job_dir / "metadata.json").write_text(json.dumps(meta, indent=2))
 
     time.sleep(2)
@@ -369,7 +397,12 @@ def apply_control(job_id: str, topic: str = "", command: str = "") -> dict:
         existing.append(ctrl_entry)
         ctrl_file.write_text(json.dumps(existing, indent=2))
 
-        return {"success": success, "job_id": job_id, "topic": topic, "stdout": result.stdout if success else result.stderr}
+        return {
+            "success": success,
+            "job_id": job_id,
+            "topic": topic,
+            "stdout": result.stdout if success else result.stderr,
+        }
 
     return {"success": False, "error": "No topic specified"}
 
@@ -404,9 +437,13 @@ def list_jobs() -> dict:
     for jid, info in _jobs.items():
         proc = info.get("process")
         if proc and proc.poll() is None:
-            active.append({"job_id": jid, "world_name": info["world_name"], "running": True})
+            active.append(
+                {"job_id": jid, "world_name": info["world_name"], "running": True}
+            )
         else:
-            completed.append({"job_id": jid, "world_name": info["world_name"], "running": False})
+            completed.append(
+                {"job_id": jid, "world_name": info["world_name"], "running": False}
+            )
 
     for job_dir in sorted(JOBS_DIR.iterdir()):
         if not job_dir.is_dir() or job_dir.name in _jobs:
@@ -414,11 +451,13 @@ def list_jobs() -> dict:
         meta_path = job_dir / "metadata.json"
         if meta_path.exists():
             meta = json.loads(meta_path.read_text())
-            completed.append({
-                "job_id": job_dir.name,
-                "world_name": meta.get("world_name", "unknown"),
-                "stop_requested": (job_dir / "stop.signal").exists(),
-            })
+            completed.append(
+                {
+                    "job_id": job_dir.name,
+                    "world_name": meta.get("world_name", "unknown"),
+                    "stop_requested": (job_dir / "stop.signal").exists(),
+                }
+            )
 
     return {
         "success": True,
@@ -438,7 +477,7 @@ def _job_dir_for(job_id: str) -> Path:
 
 
 def _extract_json(text: str) -> dict | None:
-    for m in re.finditer(r'\{[^{}]*\}', text):
+    for m in re.finditer(r"\{[^{}]*\}", text):
         try:
             return json.loads(m.group())
         except json.JSONDecodeError:
@@ -447,7 +486,7 @@ def _extract_json(text: str) -> dict | None:
 
 
 def _extract_json_array(text: str) -> list:
-    for m in re.finditer(r'\[.*?\]', text, re.DOTALL):
+    for m in re.finditer(r"\[.*?\]", text, re.DOTALL):
         try:
             return json.loads(m.group())
         except json.JSONDecodeError:
@@ -501,7 +540,12 @@ After completion, summarize what happened and any observations."""
     try:
         result = await ctx.sample(prompt)
         text = getattr(result, "text", None) or str(result)
-        return {"success": True, "message": "Workflow completed.", "plan_and_result": text.strip(), "sampling_used": True}
+        return {
+            "success": True,
+            "message": "Workflow completed.",
+            "plan_and_result": text.strip(),
+            "sampling_used": True,
+        }
     except Exception as e:
         try:
             resp = httpx.post(
@@ -509,9 +553,18 @@ After completion, summarize what happened and any observations."""
                 json={"model": "llama3.2:3b", "prompt": prompt, "stream": False},
                 timeout=120,
             )
-            return {"success": True, "message": "Workflow completed (Ollama).", "plan_and_result": resp.json().get("response", ""), "sampling_used": False, "model": "ollama"}
+            return {
+                "success": True,
+                "message": "Workflow completed (Ollama).",
+                "plan_and_result": resp.json().get("response", ""),
+                "sampling_used": False,
+                "model": "ollama",
+            }
         except Exception as ollama_e:
-            return {"success": False, "message": f"Both sampling and Ollama fallback failed: {e}; {ollama_e}"}
+            return {
+                "success": False,
+                "message": f"Both sampling and Ollama fallback failed: {e}; {ollama_e}",
+            }
 
 
 @mcp.tool()
@@ -559,11 +612,24 @@ Example: {{"topic": "/model/vehicle/cmd_vel", "command": "linear: {{x: 0.5}}"}}"
 
     ctrl = _extract_json(text)
     if not ctrl or "topic" not in ctrl:
-        return {"success": False, "message": "Could not parse LLM output as topic/command.", "raw_llm_output": text}
+        return {
+            "success": False,
+            "message": "Could not parse LLM output as topic/command.",
+            "raw_llm_output": text,
+        }
 
     gz = _find_gz()
     if gz:
-        cmd = [*gz, "topic", "-t", ctrl["topic"], "-m", "gz.msgs.Twist", "-p", ctrl.get("command", "")]
+        cmd = [
+            *gz,
+            "topic",
+            "-t",
+            ctrl["topic"],
+            "-m",
+            "gz.msgs.Twist",
+            "-p",
+            ctrl.get("command", ""),
+        ]
         try:
             subprocess.run(cmd, capture_output=True, text=True, timeout=10)
         except Exception:
@@ -572,10 +638,18 @@ Example: {{"topic": "/model/vehicle/cmd_vel", "command": "linear: {{x: 0.5}}"}}"
     if job_dir.exists():
         ctrl_file = job_dir / "control.json"
         existing = json.loads(ctrl_file.read_text()) if ctrl_file.exists() else []
-        existing.append({"topic": ctrl["topic"], "command": ctrl.get("command", ""), "source": "nl"})
+        existing.append(
+            {"topic": ctrl["topic"], "command": ctrl.get("command", ""), "source": "nl"}
+        )
         ctrl_file.write_text(json.dumps(existing, indent=2))
 
-    return {"success": True, "message": f"Generated command for topic {ctrl['topic']}.", "topic": ctrl["topic"], "command": ctrl.get("command", ""), "source": "sampling" if sampling_used else "ollama"}
+    return {
+        "success": True,
+        "message": f"Generated command for topic {ctrl['topic']}.",
+        "topic": ctrl["topic"],
+        "command": ctrl.get("command", ""),
+        "source": "sampling" if sampling_used else "ollama",
+    }
 
 
 @mcp.tool()
@@ -633,15 +707,29 @@ Describe in plain English:
     try:
         result = await ctx.sample(analyze_prompt)
         text = getattr(result, "text", None) or str(result)
-        return {"success": True, "message": "State analyzed.", "analysis": text.strip(), "sampling_used": True}
+        return {
+            "success": True,
+            "message": "State analyzed.",
+            "analysis": text.strip(),
+            "sampling_used": True,
+        }
     except Exception:
         try:
             resp = httpx.post(
                 "http://127.0.0.1:11434/api/generate",
-                json={"model": "llama3.2:3b", "prompt": analyze_prompt, "stream": False},
+                json={
+                    "model": "llama3.2:3b",
+                    "prompt": analyze_prompt,
+                    "stream": False,
+                },
                 timeout=30,
             )
-            return {"success": True, "message": "State analyzed (Ollama).", "analysis": resp.json().get("response", ""), "sampling_used": False}
+            return {
+                "success": True,
+                "message": "State analyzed (Ollama).",
+                "analysis": resp.json().get("response", ""),
+                "sampling_used": False,
+            }
         except Exception as e:
             return {"success": False, "message": f"LLM unavailable: {e}"}
 
@@ -671,8 +759,11 @@ async def analyze_sim_logs(job_id: str, ctx: Context) -> dict:
 
     if not stderr_text:
         stop_requested = (job_dir / "stop.signal").exists()
-        return {"success": True, "message": "No errors in log output.",
-                "analysis": f"Job {job_id}: {'stop was requested' if stop_requested else 'still running or unknown'}. No error logs found."}
+        return {
+            "success": True,
+            "message": "No errors in log output.",
+            "analysis": f"Job {job_id}: {'stop was requested' if stop_requested else 'still running or unknown'}. No error logs found.",
+        }
 
     log_prompt = f"""You are a robotics debug engineer. Given these Gazebo simulation logs, diagnose any issues.
 
@@ -688,7 +779,12 @@ Provide:
     try:
         result = await ctx.sample(log_prompt)
         text = getattr(result, "text", None) or str(result)
-        return {"success": True, "message": "Logs analyzed.", "analysis": text.strip(), "sampling_used": True}
+        return {
+            "success": True,
+            "message": "Logs analyzed.",
+            "analysis": text.strip(),
+            "sampling_used": True,
+        }
     except Exception:
         try:
             resp = httpx.post(
@@ -696,7 +792,12 @@ Provide:
                 json={"model": "llama3.2:3b", "prompt": log_prompt, "stream": False},
                 timeout=30,
             )
-            return {"success": True, "message": "Logs analyzed (Ollama).", "analysis": resp.json().get("response", ""), "sampling_used": False}
+            return {
+                "success": True,
+                "message": "Logs analyzed (Ollama).",
+                "analysis": resp.json().get("response", ""),
+                "sampling_used": False,
+            }
         except Exception as e:
             return {"success": False, "message": f"LLM unavailable: {e}"}
 
@@ -737,7 +838,10 @@ Example: ["https://fuel.gazebosim.org/1.0/OpenRobotics/models/Thrall_V2/model.sd
             return {"success": False, "message": "LLM unavailable for model discovery."}
 
     if not urls:
-        return {"success": False, "message": "Could not generate model URLs from description."}
+        return {
+            "success": False,
+            "message": "Could not generate model URLs from description.",
+        }
 
     found = []
     for url in urls[:4]:

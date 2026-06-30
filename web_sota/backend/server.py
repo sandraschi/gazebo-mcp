@@ -10,10 +10,18 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from gazebo_mcp.server import sim_status, list_worlds, list_jobs, load_world, start_sim, stop_sim, get_state
+from gazebo_mcp.server import (
+    get_state,
+    list_jobs,
+    list_worlds,
+    load_world,
+    sim_status,
+    start_sim,
+    stop_sim,
+)
+from web_sota.backend.log_buffer import activity_log
 from web_sota.backend.routes.ai import router as ai_router
 from web_sota.backend.routes.logging import router as logging_router
-from web_sota.backend.log_buffer import activity_log
 
 
 @asynccontextmanager
@@ -63,7 +71,11 @@ async def simulations():
 
 @app.post("/api/simulations/start")
 async def sim_start(body: dict):
-    return start_sim(world_name=body.get("world_name", ""), headless=body.get("headless", True), extra_args=body.get("extra_args", ""))
+    return start_sim(
+        world_name=body.get("world_name", ""),
+        headless=body.get("headless", True),
+        extra_args=body.get("extra_args", ""),
+    )
 
 
 @app.post("/api/simulations/stop")
@@ -84,6 +96,7 @@ async def world_load(body: dict):
 @app.get("/api/llm/providers")
 async def llm_providers():
     import httpx
+
     try:
         r = httpx.get("http://127.0.0.1:11434/api/tags", timeout=3)
         return {"ollama": r.json().get("models", [{"name": "llama3.2:3b"}])}
@@ -94,10 +107,15 @@ async def llm_providers():
 @app.post("/api/llm/chat")
 async def llm_chat(body: dict):
     import httpx
+
     try:
         resp = httpx.post(
             "http://127.0.0.1:11434/api/generate",
-            json={"model": body.get("model", "llama3.2:3b"), "prompt": body.get("prompt", ""), "stream": False},
+            json={
+                "model": body.get("model", "llama3.2:3b"),
+                "prompt": body.get("prompt", ""),
+                "stream": False,
+            },
             timeout=60,
         )
         return resp.json()
@@ -117,7 +135,14 @@ if dist.is_dir():
 
 def run_dev() -> None:
     import uvicorn
-    uvicorn.run("web_sota.backend.server:app", host="127.0.0.1", port=10991, log_level="info", reload=True)
+
+    uvicorn.run(
+        "web_sota.backend.server:app",
+        host="127.0.0.1",
+        port=10991,
+        log_level="info",
+        reload=True,
+    )
 
 
 if __name__ == "__main__":
