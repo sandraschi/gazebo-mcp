@@ -1,0 +1,11 @@
+services:
+  gazebo-mcp:
+    build: .
+    ports:
+      - "10991:10991"
+    environment:
+      - GAZEBO_MCP_PORT=10991
+      - GAZEBO_MCP_HOST=0.0.0.0
+    volumes:
+      - ./worlds:/app/worlds
+      - ./jobs:/app/jobs

@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "SessionStart": [{
+      "matcher": "",
+      "hooks": [{
+        "type": "text",
+        "text": "## Session Context (Gazebo MCP)\n\nYou have access to a Gazebo simulation server with 14 tools. You can load SDF worlds, spawn models, control topics, and run AI workflows.\n\n**Before starting work:**\n1. Check server health: sim_status()\n2. List available worlds: list_worlds()\n3. List running jobs: list_jobs()\n\n**At end of work, save findings:**\n- Stop any running simulations: stop_sim(job_id=...)"
+      }]
+    }]
+  }
+}

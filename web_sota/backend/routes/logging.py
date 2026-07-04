@@ -20,7 +20,7 @@ async def get_logs(
     level: str | None = Query(None),
     kind: str | None = Query(None),
     search: str | None = Query(None),
-    sort: str = Query("desc", regex="^(asc|desc)$"),
+    sort: str = Query("desc", pattern="^(asc|desc)$"),
     after_id: str | None = Query(None),
 ):
     log = getattr(request.app.state, "activity_log", None)
@@ -55,7 +55,7 @@ async def logs_stats(request: Request):
 @router.get("/api/logs/export")
 async def logs_export(
     request: Request,
-    format: str = Query("json", regex="^(json|csv)$"),
+    format: str = Query("json", pattern="^(json|csv)$"),
     level: str | None = Query(None),
     kind: str | None = Query(None),
     search: str | None = Query(None),

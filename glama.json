@@ -1,0 +1,25 @@
+{
+  "$schema": "https://glama.ai/mcp/schemas/2025/server.json",
+  "name": "gazebo-mcp",
+  "description": "Gazebo simulation via MCP — load worlds, spawn models, control topics, run AI workflows",
+  "version": "0.2.0",
+  "categories": ["Physics", "Robotics", "Simulation"],
+  "tools": [
+    {"name": "sim_status", "description": "Health check: gz available, depot, active jobs"},
+    {"name": "load_world", "description": "Load SDF world file into depot"},
+    {"name": "spawn_model", "description": "Spawn a model in a running simulation"},
+    {"name": "start_sim", "description": "Start a Gazebo simulation"},
+    {"name": "stop_sim", "description": "Stop a simulation by job_id"},
+    {"name": "get_state", "description": "Get simulation process state"},
+    {"name": "apply_control", "description": "Publish to a Gazebo topic"},
+    {"name": "list_worlds", "description": "List worlds in depot"},
+    {"name": "list_jobs", "description": "List active/completed jobs"},
+    {"name": "agentic_sim_workflow", "description": "Multi-step AI simulation workflow"},
+    {"name": "natural_language_control", "description": "NL to Gazebo topic commands"},
+    {"name": "analyze_sim_state", "description": "Describe sim state via LLM"},
+    {"name": "analyze_sim_logs", "description": "Diagnose sim errors from logs"},
+    {"name": "discover_model", "description": "Find SDF models from GitHub/Fuel"}
+  ],
+  "keywords": ["gazebo", "simulation", "robotics", "mcp"],
+  "homepage": "https://github.com/sandraschi/gazebo-mcp"
+}

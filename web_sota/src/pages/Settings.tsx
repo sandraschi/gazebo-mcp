@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { API_BASE } from "../lib/api";
 
 export default function Settings() {
   const [worldDir, setWorldDir] = useState("");
@@ -11,7 +12,7 @@ export default function Settings() {
   const [testResult, setTestResult] = useState("");
 
   useEffect(() => {
-    fetch("/api/settings")
+    fetch(API_BASE + "/api/settings")
       .then((r) => r.json())
       .then((d) => {
         if (d.settings) {
@@ -23,7 +24,7 @@ export default function Settings() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/llm/providers")
+    fetch(API_BASE + "/api/llm/providers")
       .then((r) => r.json())
       .then((d) => {
         setProviders(d);
@@ -47,7 +48,7 @@ export default function Settings() {
   const testConnection = async () => {
     setTestResult("Testing...");
     try {
-      const r = await fetch("/api/llm/chat", {
+      const r = await fetch(API_BASE + "/api/llm/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ provider: selectedProvider, model: selectedModel, prompt: "Hello, respond with just: OK" }),
@@ -61,7 +62,7 @@ export default function Settings() {
 
   const handleSave = async () => {
     try {
-      const r = await fetch("/api/settings", {
+      const r = await fetch(API_BASE + "/api/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ world_dir: worldDir, jobs_dir: jobsDir }),

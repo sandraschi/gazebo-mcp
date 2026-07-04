@@ -1,0 +1,6 @@
+{
+  "name": "gazebo-mcp",
+  "version": "0.2.0",
+  "description": "Gazebo simulation via MCP",
+  "hooks": "../hooks/hooks.json"
+}

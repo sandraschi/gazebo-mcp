@@ -9,6 +9,7 @@ export default defineConfig({
     proxy: {
       "/api": "http://127.0.0.1:10991",
       "/health": "http://127.0.0.1:10991",
+      "/mcp": "http://127.0.0.1:10991",
     },
   },
   build: { outDir: "dist" },

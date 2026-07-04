@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -10,6 +11,10 @@ import httpx
 from fastmcp import Context, FastMCP
 
 mcp = FastMCP("gazebo-mcp")
+
+_READ_ONLY = {"readonly": True}
+_MUTATING = {}
+_OLLAMA_MODEL = os.environ.get("GAZEBO_MCP_OLLAMA_MODEL", "llama3.2:3b")
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 WORLD_DIR = REPO_ROOT / "worlds"
@@ -99,7 +104,7 @@ def _detect_gz_version() -> str | None:
 # ---------------------------------------------------------------------------
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY)
 def sim_status() -> dict:
     """Health check: Gazebo CLI availability, world dirs, active jobs.
 
@@ -126,7 +131,7 @@ def sim_status() -> dict:
     }
 
 
-@mcp.tool()
+@mcp.tool(annotations=_MUTATING)
 def load_world(uri: str, name: str) -> dict:
     """Load an SDF world file into the simulation depot.
 
@@ -159,7 +164,7 @@ def load_world(uri: str, name: str) -> dict:
     return {"success": True, "name": name, "path": str(dest)}
 
 
-@mcp.tool()
+@mcp.tool(annotations=_MUTATING)
 def spawn_model(uri: str, name: str, world: str = "default") -> dict:
     """Spawn a model into a running simulation via gz service.
 
@@ -218,7 +223,7 @@ def spawn_model(uri: str, name: str, world: str = "default") -> dict:
         return {"success": False, "error": str(e)}
 
 
-@mcp.tool()
+@mcp.tool(annotations=_MUTATING)
 def start_sim(world_name: str, headless: bool = True, extra_args: str = "") -> dict:
     """Start a Gazebo simulation in a background process.
 
@@ -289,7 +294,7 @@ def start_sim(world_name: str, headless: bool = True, extra_args: str = "") -> d
     }
 
 
-@mcp.tool()
+@mcp.tool(annotations=_MUTATING)
 def stop_sim(job_id: str) -> dict:
     """Stop a running Gazebo simulation by job_id.
 
@@ -318,7 +323,7 @@ def stop_sim(job_id: str) -> dict:
     return {"success": True, "job_id": job_id, "stopped": True}
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY)
 def get_state(job_id: str) -> dict:
     """Get current simulation state from job metadata and process status.
 
@@ -361,7 +366,7 @@ def get_state(job_id: str) -> dict:
     }
 
 
-@mcp.tool()
+@mcp.tool(annotations=_MUTATING)
 def apply_control(job_id: str, topic: str = "", command: str = "") -> dict:
     """Publish a command to a ROS 2 or Gazebo topic.
 
@@ -407,7 +412,7 @@ def apply_control(job_id: str, topic: str = "", command: str = "") -> dict:
     return {"success": False, "error": "No topic specified"}
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY)
 def list_worlds() -> dict:
     """List all loaded worlds in the depot with metadata.
 
@@ -421,7 +426,7 @@ def list_worlds() -> dict:
     return {"success": True, "worlds": depot, "count": len(depot)}
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY)
 def list_jobs() -> dict:
     """List active and completed simulation jobs.
 
@@ -499,7 +504,7 @@ def _extract_json_array(text: str) -> list:
 # ---------------------------------------------------------------------------
 
 
-@mcp.tool()
+@mcp.tool(annotations=_MUTATING)
 async def agentic_sim_workflow(goal: str, ctx: Context) -> dict:
     """Execute an autonomous multi-step simulation workflow using the host LLM.
 
@@ -550,7 +555,7 @@ After completion, summarize what happened and any observations."""
         try:
             resp = httpx.post(
                 "http://127.0.0.1:11434/api/generate",
-                json={"model": "llama3.2:3b", "prompt": prompt, "stream": False},
+                json={"model": _OLLAMA_MODEL, "prompt": prompt, "stream": False},
                 timeout=120,
             )
             return {
@@ -567,7 +572,7 @@ After completion, summarize what happened and any observations."""
             }
 
 
-@mcp.tool()
+@mcp.tool(annotations=_MUTATING)
 async def natural_language_control(prompt: str, job_id: str, ctx: Context) -> dict:
     """Convert a natural language command to a Gazebo topic command for a running sim.
 
@@ -582,6 +587,8 @@ async def natural_language_control(prompt: str, job_id: str, ctx: Context) -> di
     natural_language_control(prompt="stop all motion", job_id="abc12345")
     """
     job_dir = _job_dir_for(job_id)
+    if not job_dir.exists():
+        return {"success": False, "message": f"Job '{job_id}' not found"}
     meta_path = job_dir / "metadata.json"
     meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
 
@@ -603,7 +610,7 @@ Example: {{"topic": "/model/vehicle/cmd_vel", "command": "linear: {{x: 0.5}}"}}"
         try:
             resp = httpx.post(
                 "http://127.0.0.1:11434/api/generate",
-                json={"model": "llama3.2:3b", "prompt": nl_prompt, "stream": False},
+                json={"model": _OLLAMA_MODEL, "prompt": nl_prompt, "stream": False},
                 timeout=30,
             )
             text = resp.json().get("response", "")
@@ -652,7 +659,7 @@ Example: {{"topic": "/model/vehicle/cmd_vel", "command": "linear: {{x: 0.5}}"}}"
     }
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY)
 async def analyze_sim_state(job_id: str, ctx: Context) -> dict:
     """Read the current sim state and produce a natural-language analysis.
 
@@ -666,6 +673,8 @@ async def analyze_sim_state(job_id: str, ctx: Context) -> dict:
     analyze_sim_state(job_id="abc12345")
     """
     job_dir = _job_dir_for(job_id)
+    if not job_dir.exists():
+        return {"success": False, "message": f"Job '{job_id}' not found"}
     meta_path = job_dir / "metadata.json"
     state_path = job_dir / "control.json"
     meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
@@ -718,7 +727,7 @@ Describe in plain English:
             resp = httpx.post(
                 "http://127.0.0.1:11434/api/generate",
                 json={
-                    "model": "llama3.2:3b",
+                    "model": _OLLAMA_MODEL,
                     "prompt": analyze_prompt,
                     "stream": False,
                 },
@@ -734,7 +743,7 @@ Describe in plain English:
             return {"success": False, "message": f"LLM unavailable: {e}"}
 
 
-@mcp.tool()
+@mcp.tool(annotations=_READ_ONLY)
 async def analyze_sim_logs(job_id: str, ctx: Context) -> dict:
     """Read the sim stderr log and ask the LLM for root-cause analysis.
 
@@ -789,7 +798,7 @@ Provide:
         try:
             resp = httpx.post(
                 "http://127.0.0.1:11434/api/generate",
-                json={"model": "llama3.2:3b", "prompt": log_prompt, "stream": False},
+                json={"model": _OLLAMA_MODEL, "prompt": log_prompt, "stream": False},
                 timeout=30,
             )
             return {
@@ -802,7 +811,7 @@ Provide:
             return {"success": False, "message": f"LLM unavailable: {e}"}
 
 
-@mcp.tool()
+@mcp.tool(annotations=_MUTATING)
 async def discover_model(description: str, ctx: Context) -> dict:
     """Search for and suggest Gazebo SDF/URDF model URLs from a natural-language description.
 
@@ -830,7 +839,7 @@ Example: ["https://fuel.gazebosim.org/1.0/OpenRobotics/models/Thrall_V2/model.sd
         try:
             resp = httpx.post(
                 "http://127.0.0.1:11434/api/generate",
-                json={"model": "llama3.2:3b", "prompt": prompt, "stream": False},
+                json={"model": _OLLAMA_MODEL, "prompt": prompt, "stream": False},
                 timeout=30,
             )
             urls = _extract_json_array(resp.json().get("response", ""))

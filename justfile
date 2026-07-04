@@ -1,8 +1,7 @@
 import 'scripts/just/fleet.just'
 
 # === Fleet-standard ===
-    pwsh -NoProfile -c "if (Get-Command gz -ErrorAction SilentlyContinue) { gz topic -l } else { Write-Host 'Gazebo not running' }"
-bootstrap:
+check-gazebo:
     uv sync
 
 serve:

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { API_BASE } from "../lib/api";
 
 interface WorldEntry {
   uri: string;
@@ -24,7 +25,7 @@ export default function Simulations() {
 
   const fetchWorlds = useCallback(async () => {
     try {
-      const r = await fetch("/api/worlds");
+      const r = await fetch(API_BASE + "/api/worlds");
       if (r.ok) {
         const d = await r.json();
         if (d.worlds) setWorlds(d.worlds);
@@ -34,7 +35,7 @@ export default function Simulations() {
 
   const fetchJobs = useCallback(async () => {
     try {
-      const r = await fetch("/api/simulations");
+      const r = await fetch(API_BASE + "/api/simulations");
       if (r.ok) {
         const d = await r.json();
         setJobs([...(d.active || []), ...(d.completed || [])]);
@@ -51,7 +52,7 @@ export default function Simulations() {
 
   const handleStart = async () => {
     if (!selectedWorld) return;
-    await fetch("/api/simulations/start", {
+    await fetch(API_BASE + "/api/simulations/start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ world_name: selectedWorld, headless }),
@@ -60,7 +61,7 @@ export default function Simulations() {
   };
 
   const handleStop = async (jobId: string) => {
-    await fetch("/api/simulations/stop", {
+    await fetch(API_BASE + "/api/simulations/stop", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ job_id: jobId }),
@@ -76,7 +77,7 @@ export default function Simulations() {
     }
     setExpandedJob(jobId);
     try {
-      const r = await fetch(`/api/simulations/${jobId}/state`);
+      const r = await fetch(`${API_BASE}/api/simulations/${jobId}/state`);
       if (r.ok) setStateData(JSON.stringify(await r.json(), null, 2));
       else setStateData("No state available");
     } catch (e) {
@@ -88,10 +89,10 @@ export default function Simulations() {
     setAiResult(`Analyzing ${worldName} (#${jobId})...`);
     let stateStr = "";
     try {
-      const r = await fetch(`/api/simulations/${jobId}/state`);
+      const r = await fetch(`${API_BASE}/api/simulations/${jobId}/state`);
       if (r.ok) stateStr = JSON.stringify(await r.json());
     } catch {}
-    const r = await fetch("/api/llm/chat", {
+    const r = await fetch(API_BASE + "/api/llm/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { API_BASE } from "../lib/api";
 
 const quickActions = [
   { title: "Run Workflow", prompt: "Plan and execute: load a world and start a simulation" },
@@ -27,7 +28,7 @@ export default function LLM() {
     setSelectedProvider(savedProvider);
     setSelectedModel(savedModel);
 
-    fetch("/api/llm/providers")
+    fetch(API_BASE + "/api/llm/providers")
       .then((r) => r.json())
       .then((d) => {
         setProviders(d);
@@ -63,7 +64,7 @@ export default function LLM() {
     setChat((prev) => [...prev, { role: "user", content: prompt }]);
     setLoading(true);
     try {
-      const r = await fetch("/api/llm/chat", {
+      const r = await fetch(API_BASE + "/api/llm/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ provider: selectedProvider, model: selectedModel, prompt }),

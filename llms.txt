@@ -1,22 +1,30 @@
 # gazebo-mcp
 
-A general-purpose Gazebo simulation server via MCP.
+A general-purpose Gazebo simulation server via MCP (14 tools).
 
 ## Tools
+- sim_status — health check
 - load_world / list_worlds — world depot management
+- spawn_model — spawn models into running sim
 - start_sim / stop_sim / list_jobs — simulation lifecycle
 - get_state / apply_control — sim state and topic control
-- spawn_model — spawn models into running sim
-- sim_status — health check
 - agentic_sim_workflow — multi-step AI orchestration
 - natural_language_control — NL to topic commands
 - analyze_sim_state / analyze_sim_logs — AI analysis
 - discover_model — AI-powered model discovery
 
+All tools annotated with READ_ONLY / MUTATING for agent safety.
+
 ## Setup
 ```powershell
 uv run python -m gazebo_mcp
+.\start.ps1    # web dashboard (10990/10991)
 ```
 
 ## Docs
 - docs/GAZEBO_VS_OTHERS.md — Gazebo vs MuJoCo/Isaac/PyBullet
+- llms-full.txt — full tool reference, env vars, troubleshooting
+
+## Ports
+- Backend: 10991 (FastAPI + MCP HTTP)
+- Frontend: 10990 (Vite dev)

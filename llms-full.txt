@@ -1,0 +1,63 @@
+# gazebo-mcp
+
+Gazebo simulation via MCP. Load worlds, spawn models, publish topics, and automate multi-step workflows.
+
+## Quick Start
+
+```bash
+uv run python -m gazebo_mcp          # MCP stdio mode
+.\start.ps1                           # Full web dashboard (port 10990/10991)
+```
+
+## Tools (14)
+
+### Sim Tools (9)
+1. **sim_status** — Health check: gz available, depot count, active jobs
+2. **load_world(uri, name)** — Load SDF/URDF world into depot from file/URL
+3. **spawn_model(uri, name, world)** — Spawn model via gz service in a running sim
+4. **start_sim(world_name, headless, extra_args)** — Start gz sim subprocess
+5. **stop_sim(job_id)** — Stop running simulation by job_id
+6. **get_state(job_id)** — Read process state + metadata
+7. **apply_control(job_id, topic, command)** — Publish to a Gazebo topic via gz topic
+8. **list_worlds()** — List worlds in depot
+9. **list_jobs()** — List active/completed jobs
+
+### AI Tools (5)
+10. **agentic_sim_workflow(goal, ctx)** — Multi-step orchestration via host LLM
+11. **natural_language_control(prompt, job_id, ctx)** — NL to topic/command
+12. **analyze_sim_state(job_id, ctx)** — LLM describes sim state
+13. **analyze_sim_logs(job_id, ctx)** — LLM diagnoses sim errors from logs
+14. **discover_model(description, ctx)** — LLM suggests SDF model URLs
+
+## Architecture
+
+```
+src/gazebo_mcp/
+├── __init__.py, __main__.py
+├── server.py              # 14 MCP tools, depot, WSL2 support
+
+web_sota/
+├── backend/server.py      # FastAPI (port 10991)
+├── src/                   # React frontend (port 10990)
+└── e2e/                   # Playwright tests
+
+native/
+├── src/backend.rs         # Materialize + spawn backend
+├── tauri.conf.json        # NSIS config
+└── build.ps1              # Build pipeline
+```
+
+## Environment Variables
+- GAZEBO_MCP_PORT: HTTP port (set by Tauri; absent = stdio)
+- GAZEBO_MCP_HOST: bind address (default 127.0.0.1)
+- GAZEBO_MCP_TAURI: set by Tauri for CORS
+- GAZEBO_MCP_OLLAMA_MODEL: Ollama model name (default llama3.2:3b)
+
+## Ports
+- Backend (FastAPI + MCP HTTP): 10991
+- Frontend (Vite dev): 10990
+
+## Troubleshooting
+- Gazebo must be installed or accessible via WSL2 for Windows users
+- AI tools fall back to Ollama at http://localhost:11434 when ctx.sample is unavailable
+- WSL2 mode auto-detected; paths translated to /mnt/<drive>/ format
