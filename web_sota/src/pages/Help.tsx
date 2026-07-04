@@ -177,7 +177,7 @@ function Tools() {
             </tbody>
           </table>
         </div>
-        <p className="text-xs text-slate-500 mt-3">Full reference: <code className="text-xs bg-slate-100 px-1 rounded">docs/TOOLS.md</code> in the repo.</p>
+        <p className="text-xs text-slate-500 mt-3">Full reference: <code className="text-xs bg-slate-700 px-1 rounded text-slate-300">docs/TOOLS.md</code> in the repo. <em className="text-slate-500">(Tools listed here for reference; the actual tool surface is discovered dynamically from the server at runtime.)</em></p>
       </Card>
     </div>
   );

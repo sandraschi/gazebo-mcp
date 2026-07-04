@@ -6,6 +6,10 @@ interface Status {
   gz_version: string | null;
   worlds_in_depot: number;
   active_jobs: number;
+  tool_count?: number;
+  uptime_seconds?: number;
+  version?: string;
+  status?: string;
 }
 
 interface Job {
@@ -23,7 +27,7 @@ export default function Dashboard() {
 
   const fetchStatus = useCallback(async () => {
     try {
-      const r = await fetch(API_BASE + "/api/status");
+      const r = await fetch("/api/health");
       if (r.ok) setStatus(await r.json());
     } catch {}
   }, []);
@@ -64,17 +68,18 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-5xl" data-testid="dashboard">
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
 
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-4 gap-4 mb-8" data-testid="kpi-grid">
         {[
-          { label: "Gazebo", value: status?.gz_version ?? (status?.gz_available ? "Available" : "N/A") },
-          { label: "Worlds in Depot", value: status?.worlds_in_depot ?? "..." },
-          { label: "Active Jobs", value: status?.active_jobs ?? "..." },
-          { label: "Server Status", value: status ? "Online" : "Loading..." },
+          { label: "Gazebo", value: status?.gz_version ?? (status?.gz_available ? "Available" : "N/A"), testid: "kpi-gazebo" },
+          { label: "Worlds in Depot", value: status?.worlds_in_depot ?? "...", testid: "kpi-worlds" },
+          { label: "Active Jobs", value: status?.active_jobs ?? "...", testid: "kpi-jobs" },
+          { label: "Server Status", value: status ? "Online" : "Loading...", testid: "kpi-server" },
+          { label: "Tools", value: status?.tool_count ?? "...", testid: "kpi-tools" },
         ].map((c) => (
-          <div key={c.label} className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+          <div key={c.label} className="bg-slate-800 rounded-xl p-4 border border-slate-700" data-testid={c.testid}>
             <div className="text-xs text-slate-400 uppercase tracking-wider">{c.label}</div>
             <div className="text-2xl font-bold mt-1 text-cyan-300">{c.value}</div>
           </div>
