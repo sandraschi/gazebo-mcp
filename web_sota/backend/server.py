@@ -183,7 +183,7 @@ async def llm_chat(body: dict):
 
 
 # Mount MCP HTTP
-app.mount("/mcp", mcp.http_app())
+app.mount("/mcp", mcp.http_app(path="/"))
 
 # Serve frontend static files (if dist exists)
 dist = Path(__file__).resolve().parent.parent / "dist"
