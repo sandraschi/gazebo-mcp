@@ -1,8 +1,11 @@
 """Tests for gazebo-mcp."""
+
 from __future__ import annotations
 
+import asyncio
+from unittest.mock import AsyncMock, patch
+
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
 
 from ag_gazebo_bridge.server import _fleet_health, _gz_run
 
@@ -33,17 +36,16 @@ class TestGzRun:
         mock_proc.wait = AsyncMock()
         mock_exec.return_value = mock_proc
 
-        ok, output = await _gz_run("model", "--list")
+        ok, _output = await _gz_run("model", "--list")
         assert ok is True
-        assert "scout" in output
+        assert "scout" in _output
 
     async def test_gz_not_installed(self):
-        ok, output = await _gz_run("model", "--list")
-        if not ok:
-            assert "not found" in output.lower() or "gazebo" in output.lower()
+        ok, _output = await _gz_run("model", "--list")
+        assert ok is False
 
     async def test_gz_timeout(self):
-        import asyncio
+
         async def slow(*args, **kwargs):
             await asyncio.sleep(20)
             return (b"", b"")
@@ -52,6 +54,6 @@ class TestGzRun:
             mock_proc = AsyncMock()
             mock_proc.communicate = slow
             mock_exec.return_value = mock_proc
-            ok, output = await _gz_run("model", "--list")
+            ok, _output = await _gz_run("model", "--list")
             assert ok is False
-            assert "timed out" in output.lower()
+            assert "timed out" in _output.lower()
