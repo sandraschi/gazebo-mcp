@@ -8,8 +8,8 @@
     "type": "python",
     "entry_point": "src/ag_gazebo_bridge/server.py",
     "mcp_config": {
-      "command": "uv",
-      "args": ["python", "-m", "ag_gazebo_bridge.server"],
+      "command": "C:/Users/sandr/.local/bin/uv.exe",
+      "args": ["run", "python", "-m", "ag_gazebo_bridge.server"],
       "env": { "PYTHONUNBUFFERED": "1" }
     }
   },
@@ -23,6 +23,14 @@
     { "name": "sync_to_resonite", "description": "Spawn Gazebo models in Resonite VR" },
     { "name": "sync_to_freecad", "description": "Export Gazebo model to FreeCAD" },
     { "name": "fleet_sync_all", "description": "Broadcast to all connected fleet repos" },
-    { "name": "fleet_status", "description": "Health check all fleet repos" }
+    { "name": "fleet_status", "description": "Health check all fleet repos" },
+    { "name": "fleet_status_app", "description": "Fleet health as a rich card view" },
+    { "name": "gz_sim_state_app", "description": "Gazebo model list as a rich card view" }
+  ],
+  "prompts": [
+    { "name": "gazebo_help", "description": "Guidance for simulation and fleet bridging" }
+  ],
+  "resources": [
+    { "uri": "fleet://status", "description": "Live fleet connectivity status" }
   ]
 }

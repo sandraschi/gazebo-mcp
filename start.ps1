@@ -1,4 +1,4 @@
-Param([switch]$Headless)
+﻿Param([switch]$Headless)
 
 # --- SOTA Headless Standard ---
 if ($Headless -and ($Host.UI.RawUI.WindowTitle -notmatch 'Hidden')) {
@@ -10,8 +10,8 @@ $WindowStyle = if ($Headless) { 'Hidden' } else { 'Normal' }
 
 $env:FASTMCP_LOG_LEVEL = 'WARNING'
 
-# ag-gazebo-bridge Start - Standards-Compliant SOTA
+# ag-gazebo-bridge Start - MCP server (stdio mode)
 Write-Host 'Starting ag-gazebo-bridge...' -ForegroundColor Cyan
 
 Set-Location $PSScriptRoot
-uv run -m ag_gazebo_bridge
+uv run python -m ag_gazebo_bridge.server

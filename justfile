@@ -1,4 +1,5 @@
-﻿set windows-shell := ["powershell.exe", "-NoProfile", "-Command"]
+set windows-shell := ["powershell.exe", "-NoProfile", "-Command"]
+import 'scripts/just/fleet.just'
 
 # Open the interactive recipe dashboard in the browser
 default:
@@ -65,13 +66,5 @@ dev:
 
 # ── Utilities ─────────────────────────────────────────────────────────────────
 
-mcpb-pack:
-    cd '{{justfile_directory()}}'
-    $ver = (Get-Content pyproject.toml | Select-String '^version = "(.*)"' | ForEach-Object { $$_.Matches.Groups[1].Value }); \
-    $null = New-Item -ItemType Directory -Path dist -Force; \
-    Compress-Archive -Path pyproject.toml, src -DestinationPath "dist/ag-gazebo-bridge-v$ver.mcpb" -CompressionLevel Optimal -Force; \
-    Write-Host "Created dist/ag-gazebo-bridge-v$ver.mcpb" -ForegroundColor Green
-
 install-mcp client="print":
     .\install-mcp.ps1 '{{client}}'
-

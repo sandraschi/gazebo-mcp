@@ -1,33 +1,21 @@
-import { NavLink, Outlet, useLocation } from "react-router-dom";
 import {
-  BookMarked,
-  FileSearch,
-  Heart,
+  Cpu,
   HelpCircle,
   Home,
-  LayoutGrid,
-  Library,
   Menu,
-  Newspaper,
-  Search,
   Settings,
   Terminal,
   X,
 } from "lucide-react";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { LoggerPanel } from "@/components/layout/LoggerPanel";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const nav = [
-  { to: "/dashboard", label: "Home", icon: Home },
-  { to: "/search", label: "Search arXiv", icon: Search },
-  { to: "/semantic", label: "Search library", icon: FileSearch },
-  { to: "/depot", label: "Your library", icon: Library },
-  { to: "/favorites", label: "Favorites", icon: Heart },
+  { to: "/", label: "Dashboard", icon: Home },
   { to: "/tools", label: "Tools & Prompts", icon: Terminal },
-  { to: "/anthropic", label: "Lab Blogs", icon: Newspaper },
-  { to: "/apps", label: "Fleet apps", icon: LayoutGrid },
   { to: "/settings", label: "Settings", icon: Settings },
   { to: "/help", label: "Help", icon: HelpCircle },
 ] as const;
@@ -46,11 +34,13 @@ export function AppLayout() {
         )}
       >
         <div className="h-14 flex items-center gap-2 px-4 border-b border-border/60">
-          <BookMarked className="h-8 w-8 text-primary shrink-0" />
+          <Cpu className="h-8 w-8 text-primary shrink-0" />
           {open && (
             <div>
-              <div className="font-bold leading-tight">arxiv-mcp</div>
-              <div className="text-[10px] text-muted-foreground">Vite · 10771</div>
+              <div className="font-bold leading-tight">gazebo-mcp</div>
+              <div className="text-[10px] text-muted-foreground">
+                Vite · 10990
+              </div>
             </div>
           )}
         </div>
@@ -59,10 +49,13 @@ export function AppLayout() {
             <NavLink
               key={to}
               to={to}
+              end={to === "/"}
               className={({ isActive }) =>
                 cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                  isActive ? "bg-secondary text-secondary-foreground" : "hover:bg-muted/50",
+                  isActive
+                    ? "bg-secondary text-secondary-foreground"
+                    : "hover:bg-muted/50",
                   !open && "justify-center px-2",
                 )
               }
@@ -74,7 +67,12 @@ export function AppLayout() {
           ))}
         </nav>
         <div className="p-2 border-t border-border/60">
-          <Button variant="ghost" className="w-full" size="sm" onClick={() => setOpen(!open)}>
+          <Button
+            variant="ghost"
+            className="w-full"
+            size="sm"
+            onClick={() => setOpen(!open)}
+          >
             {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </Button>
         </div>
@@ -85,7 +83,7 @@ export function AppLayout() {
         <Button variant="ghost" size="icon" onClick={() => setMobile(!mobile)}>
           <Menu className="h-5 w-5" />
         </Button>
-        <span className="font-semibold text-sm">arxiv-mcp</span>
+        <span className="font-semibold text-sm">gazebo-mcp</span>
       </div>
       {mobile && (
         <div className="md:hidden fixed inset-0 z-40 bg-background/95 pt-14 px-3 pb-6 overflow-y-auto">
@@ -93,6 +91,7 @@ export function AppLayout() {
             <NavLink
               key={to}
               to={to}
+              end={to === "/"}
               onClick={() => setMobile(false)}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-3 text-sm mb-1",
@@ -109,8 +108,7 @@ export function AppLayout() {
       <div className="flex-1 flex flex-col min-w-0 min-h-screen pt-12 md:pt-0 pb-24 md:pb-28">
         <header className="hidden md:flex h-14 items-center border-b border-border/60 px-6 bg-background/40 backdrop-blur-sm sticky top-0 z-20">
           <div className="text-sm text-muted-foreground">
-            MCP HTTP proxied at <code className="text-primary">/mcp</code> · API{" "}
-            <code className="text-primary">/api</code>
+            Fleet dashboard — Gazebo simulation bridge
           </div>
         </header>
         <main className="flex-1 p-4 md:p-6 max-w-6xl w-full mx-auto">

@@ -6,9 +6,8 @@ if ($Headless -and ($Host.UI.RawUI.WindowTitle -notmatch 'Hidden')) {
 }
 $WindowStyle = if ($Headless) { 'Hidden' } else { 'Normal' }
 
-$WebPort = 10990
-$BackendPort = 10991
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
+$WebPort = 10990
 
 function Clear-Port {
     param([int]$Port)
