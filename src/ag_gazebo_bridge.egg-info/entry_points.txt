@@ -1,2 +1,0 @@
-[console_scripts]
-ag-gazebo-bridge = ag_gazebo_bridge.server:main
