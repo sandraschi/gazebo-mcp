@@ -9,7 +9,7 @@ dependencies = ["fastmcp>=3.4.4,<4", "httpx>=0.28", "fastapi>=0.115", "uvicorn[s
 gazebo-mcp = "gazebo_mcp:main"
 
 [dependency-groups]
-dev = ["pytest>=8", "pytest-asyncio>=0.24", "pytest-mock>=3", "httpx>=0.28", "ty>=0.0.50"]
+dev = ["pytest>=8", "pytest-asyncio>=0.24", "pytest-mock>=3", "httpx>=0.28", "ruff>=0.16", "ty>=0.0.50"]
 
 [build-system]
 requires = ["hatchling"]
@@ -25,7 +25,7 @@ asyncio_mode = "auto"
 target-version = "py311"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "W", "UP", "ASYNC"]
+select = ["E", "F", "I", "N", "W", "UP"]
 ignore = ["E501"]
 
 [tool.ruff.format]

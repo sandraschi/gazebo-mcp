@@ -36,9 +36,3 @@ worlds:
 
 topics:
     powershell.exe -NoProfile -c "if (Get-Command gz -ErrorAction SilentlyContinue) { gz topic -l } else { Write-Host 'Gazebo not running' }"
-
-# Bootstrap: install dev deps + pre-commit hook
-bootstrap:
-    uv sync --group dev
-    uv run pre-commit install
-    Write-Host "Pre-commit hooks installed." -ForegroundColor Green

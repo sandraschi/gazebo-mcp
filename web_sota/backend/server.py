@@ -24,8 +24,8 @@ from gazebo_mcp.server import (
 )
 from web_sota.backend.log_buffer import activity_log
 from web_sota.backend.routes.ai import router as ai_router
-from web_sota.backend.routes.logging import router as logging_router
 from web_sota.backend.routes.fuel import router as fuel_router
+from web_sota.backend.routes.logging import router as logging_router
 
 _server_start_time = time.time()
 
@@ -108,11 +108,20 @@ async def diagnostics():
         "uptime_seconds": int(time.time() - _server_start_time),
         "tool_count": 14,
         "tools": [
-            {"name": "sim_status"}, {"name": "load_world"}, {"name": "spawn_model"},
-            {"name": "start_sim"}, {"name": "stop_sim"}, {"name": "get_state"},
-            {"name": "apply_control"}, {"name": "list_worlds"}, {"name": "list_jobs"},
-            {"name": "agentic_sim_workflow"}, {"name": "natural_language_control"},
-            {"name": "analyze_sim_state"}, {"name": "analyze_sim_logs"}, {"name": "discover_model"},
+            {"name": "sim_status"},
+            {"name": "load_world"},
+            {"name": "spawn_model"},
+            {"name": "start_sim"},
+            {"name": "stop_sim"},
+            {"name": "get_state"},
+            {"name": "apply_control"},
+            {"name": "list_worlds"},
+            {"name": "list_jobs"},
+            {"name": "agentic_sim_workflow"},
+            {"name": "natural_language_control"},
+            {"name": "analyze_sim_state"},
+            {"name": "analyze_sim_logs"},
+            {"name": "discover_model"},
         ],
         "system": {"windows": sys.platform == "win32"},
         "errors": [],
@@ -161,6 +170,7 @@ async def world_load(body: dict):
 @app.get("/api/llm/providers")
 async def llm_providers():
     import httpx
+
     try:
         r = httpx.get("http://127.0.0.1:11434/api/tags", timeout=3)
         return {"ollama": r.json().get("models", [{"name": "llama3.2:3b"}])}
@@ -171,10 +181,15 @@ async def llm_providers():
 @app.post("/api/llm/chat")
 async def llm_chat(body: dict):
     import httpx
+
     try:
         resp = httpx.post(
             "http://127.0.0.1:11434/api/generate",
-            json={"model": body.get("model", "llama3.2:3b"), "prompt": body.get("prompt", ""), "stream": False},
+            json={
+                "model": body.get("model", "llama3.2:3b"),
+                "prompt": body.get("prompt", ""),
+                "stream": False,
+            },
             timeout=60,
         )
         return resp.json()
@@ -193,8 +208,15 @@ if dist.is_dir():
 
 def run_dev() -> None:
     import uvicorn
+
     port = int(os.environ.get("GAZEBO_MCP_PORT", "10991"))
-    uvicorn.run("web_sota.backend.server:app", host="127.0.0.1", port=port, log_level="info", reload=True)
+    uvicorn.run(
+        "web_sota.backend.server:app",
+        host="127.0.0.1",
+        port=port,
+        log_level="info",
+        reload=True,
+    )
 
 
 if __name__ == "__main__":

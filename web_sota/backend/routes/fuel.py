@@ -33,16 +33,18 @@ async def list_fuel(search: str = "", tag: str = ""):
                 break
             for m in data:
                 tags = m.get("tags") or []
-                all_models.append({
-                    "name": f"{m['owner']}/{m['name']}",
-                    "owner": m["owner"],
-                    "model": m["name"],
-                    "tags": tags,
-                    "description": (m.get("description") or "")[:120],
-                    "downloads": m.get("downloads", 0),
-                    "license": m.get("license_name", ""),
-                    "download_url": f"{_FUEL_BASE}/{m['owner']}/models/{m['name']}/1/model.sdf",
-                })
+                all_models.append(
+                    {
+                        "name": f"{m['owner']}/{m['name']}",
+                        "owner": m["owner"],
+                        "model": m["name"],
+                        "tags": tags,
+                        "description": (m.get("description") or "")[:120],
+                        "downloads": m.get("downloads", 0),
+                        "license": m.get("license_name", ""),
+                        "download_url": f"{_FUEL_BASE}/{m['owner']}/models/{m['name']}/1/model.sdf",
+                    }
+                )
             page += 1
             if len(data) < 50:
                 break
@@ -50,7 +52,11 @@ async def list_fuel(search: str = "", tag: str = ""):
     results = _FUEL_CACHE
     if search:
         q = search.lower()
-        results = [m for m in results if q in m["name"].lower() or q in m.get("description", "").lower()]
+        results = [
+            m
+            for m in results
+            if q in m["name"].lower() or q in m.get("description", "").lower()
+        ]
     if tag:
         results = [m for m in results if tag in [t.lower() for t in m.get("tags", [])]]
     return {"models": results, "count": len(results), "total": len(_FUEL_CACHE)}
