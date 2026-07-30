@@ -2,15 +2,13 @@ name: CI
 
 on:
   push:
-    branches: ["*"]
-    tags: ["v*"]
+    branches: [main]
   pull_request:
-  schedule:
-    - cron: "0 6 * * *"
+    branches: [main]
   workflow_dispatch:
 
 jobs:
-  lint:
+  ci:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,48 +17,14 @@ jobs:
           python-version: "3.12"
       - run: uv sync --group dev
       - run: uv run ruff check src/ web_sota/backend/
-
-  ty:
-    runs-on: windows-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - run: uv run ruff format --check src/ web_sota/backend/
+      - run: uv run pytest -x --tb=short -k "not slow"
+      - uses: oven-sh/setup-bun@v2
         with:
-          python-version: "3.12"
-      - run: uv sync --group dev
-      - run: uv run ty check src/ || true
-
-  test:
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.11", "3.12", "3.13"]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-      - run: uv sync --group dev
-      - run: uv run ruff check src/ web_sota/backend/
-      - run: uv run --group dev pytest -x --tb=short -k "not slow"
-
-  build-web:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      - run: npm ci
+          bun-version: latest
+      - run: bun install --frozen-lockfile
         working-directory: web_sota
-      - name: TypeScript check
+      - run: bunx tsc --noEmit
         working-directory: web_sota
-        run: npx tsc --noEmit
-      - name: Biome lint
+      - run: bun run build
         working-directory: web_sota
-        run: npx @biomejs/biome check src/
-      - name: Vite build
-        working-directory: web_sota
-        run: npx vite build
