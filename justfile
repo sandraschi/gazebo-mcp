@@ -3,9 +3,6 @@ set windows-shell := ["powershell.exe", "-NoProfile", "-Command"]
 import 'scripts/just/fleet.just'
 
 # === Fleet-standard ===
-check-gazebo:
-    uv sync
-
 serve:
     uv run python -m gazebo_mcp
 
