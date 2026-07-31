@@ -10,10 +10,10 @@ serve:
     uv run python -m gazebo_mcp
 
 lint:
-    ruff check src/ web_sota/backend/
+    uv run ruff check src/ web_sota/backend/
 
 fix:
-    ruff check --fix src/ web_sota/backend/
+    uv run ruff check --fix src/ web_sota/backend/
 
 test:
     uv run pytest tests/ -q
