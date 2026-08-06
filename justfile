@@ -5,7 +5,7 @@ import 'scripts/just/fleet.just'
 default:
     @just --list
 
-# ── Quality ───────────────────────────────────────────────────────────────────
+# --- Quality ---
 
 lint:
     cd '{{justfile_directory()}}'
@@ -16,19 +16,19 @@ fix:
     uv run ruff check --fix src/
     uv run ruff format src/
 
-# ── Testing ───────────────────────────────────────────────────────────────────
+# --- Testing ---
 
 test:
     cd '{{justfile_directory()}}'
     uv run pytest
 
-# ── Serving ───────────────────────────────────────────────────────────────────
+# --- Serving ---
 
 stdio:
     cd '{{justfile_directory()}}'
     uv run python -m ag_gazebo_bridge.server
 
-# ── Python ───────────────────────────────────────────────────────────────────
+# --- Python ---
 
 install:
     cd '{{justfile_directory()}}'
@@ -39,7 +39,7 @@ sync:
     cd '{{justfile_directory()}}'
     uv sync
 
-# ── Gazebo ──────────────────────────────────────────────────────────────────
+# --- Gazebo ---
 
 # List Gazebo simulation models
 models:
@@ -54,7 +54,7 @@ fleet:
     cd '{{justfile_directory()}}'; \
     uv run python -c "import asyncio; from ag_gazebo_bridge.server import fleet_status; print(asyncio.run(fleet_status()))"
 
-# Full fleet sync (Gazebo → all repos)
+# --- Full fleet sync  Gazebo  all repos ---
 sync-all:
     cd '{{justfile_directory()}}'; \
     uv run python -c "import asyncio; from ag_gazebo_bridge.server import fleet_sync_all; print(asyncio.run(fleet_sync_all()))"
@@ -64,7 +64,13 @@ dev:
     cd '{{justfile_directory()}}\web_sota'
     .\start.ps1
 
-# ── Utilities ─────────────────────────────────────────────────────────────────
+# --- Utilities ---
 
 install-mcp client="print":
     .\install-mcp.ps1 '{{client}}'
+
+# Bootstrap: install dev deps + pre-commit hook
+bootstrap:
+    uv sync --group dev
+    uv run pre-commit install
+    Write-Host "Pre-commit hooks installed." -ForegroundColor Green

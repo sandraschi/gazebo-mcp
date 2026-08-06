@@ -1,0 +1,28 @@
+{
+  "$schema": "https://glama.ai/mcp/schemas/glama.json",
+  "name": "gazebo-mcp",
+  "description": "FastMCP 3.4 bridge from Gazebo robotics simulation to the fleet robotics mesh",
+  "author": "Sandra Schipal",
+  "categories": ["robotics", "simulation", "infrastructure"],
+  "tags": ["gazebo", "ros2", "simulation", "robotics", "mcp", "fleet"],
+  "transport": ["stdio", "streamable-http"],
+  "tools": [
+    "gz_topic_pub",
+    "gz_topic_list",
+    "gz_sim_state",
+    "gz_service_call",
+    "sync_to_yahboom",
+    "sync_to_unity",
+    "sync_to_resonite",
+    "sync_to_freecad",
+    "fleet_sync_all",
+    "fleet_status",
+    "fleet_status_app",
+    "gz_sim_state_app"
+  ],
+  "prompts": ["gazebo_help"],
+  "resources": ["fleet://status"],
+  "repository": "https://github.com/sandraschi/gazebo-mcp",
+  "homepage": "https://github.com/sandraschi/gazebo-mcp",
+  "license": "MIT"
+}

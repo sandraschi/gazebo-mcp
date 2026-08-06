@@ -1,0 +1,22 @@
+{
+  "manifest_version": "0.2",
+  "name": "ag-gazebo-bridge",
+  "version": "0.2.0",
+  "description": "FastMCP 3.2 bridge from Gazebo simulation to fleet robotics mesh",
+  "author": { "name": "sandraschi" },
+  "server": {
+    "type": "python",
+    "entry_point": "src/ag_gazebo_bridge/server.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": ["run","--directory","${PWD}","python","-m","ag_gazebo_bridge"],
+      "env": {
+        "PYTHONPATH": "${PWD}/src",
+        "PYTHONUNBUFFERED": "1"
+      }
+    }
+  },
+  "tools": [
+    { "name": "gz_topic_pub", "description": "gz_topic_pub" }
+  ]
+}

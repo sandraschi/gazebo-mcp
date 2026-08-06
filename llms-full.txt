@@ -1,0 +1,99 @@
+# gazebo-mcp — Full Corpus
+
+## Tools
+
+### Gazebo (simulation control)
+
+| Tool | Description |
+|------|-------------|
+| `gz_topic_pub(topic, msg_type, message)` | Publish a message to a Gazebo simulation topic (e.g. /model/rover/cmd_vel). `msg_type` like `gz.msgs.Twist`. |
+| `gz_topic_list()` | List all active Gazebo topics in the running simulation. |
+| `gz_sim_state()` | List all models currently in the simulation. Returns `{models: [...], count: N}`. |
+| `gz_service_call(service, req_type, rep_type, request, timeout)` | Call a Gazebo service (spawn, delete, pause, etc.). |
+
+### Fleet bridges
+
+| Tool | Description |
+|------|-------------|
+| `sync_to_yahboom(robot_model, command, params?)` | Push a Gazebo robot command to the physical Yahboom robot. Commands: move, stop, patrol, scan. |
+| `sync_to_unity(models?)` | Export Gazebo scene to Unity 3D visualization. Defaults to all models. |
+| `sync_to_resonite(models?, position?)` | Spawn Gazebo models in Resonite VR world. Optional spawn position JSON. |
+| `sync_to_freecad(model, format?)` | Export a Gazebo model to FreeCAD (step, stl, iges, fcstd). |
+| `fleet_sync_all(models?)` | One-shot broadcast of Gazebo sim state to all connected fleet repos. |
+| `fleet_status()` | Health check all connected fleet repos. Returns per-repo status. |
+
+### Prefab App tools
+
+| Tool | Description |
+|------|-------------|
+| `fleet_status_app()` | Fleet health as a rich card view (Prefab UI). |
+| `gz_sim_state_app()` | Gazebo model list as a rich card view (Prefab UI). |
+
+## Prompts
+
+| Prompt | Description |
+|--------|-------------|
+| `gazebo_help(topic?)` | Guidance for simulation control and fleet bridging. Topics: overview, fleet. |
+
+## Environment
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `FLEET_YAHBOOM_URL` | `http://127.0.0.1:10893` | yahboom-mcp backend |
+| `FLEET_UNITY3D_URL` | `http://127.0.0.1:10831` | unity3d-mcp backend |
+| `FLEET_RESONITE_URL` | `http://127.0.0.1:10979` | resonite-mcp backend |
+| `FLEET_FREECAD_URL` | `http://127.0.0.1:10945` | freecad-mcp backend |
+| `FLEET_ROBOTICS_URL` | `http://127.0.0.1:10706` | robotics-mcp web dashboard |
+
+## Run
+
+### stdio (MCP server)
+```
+uv run python -m ag_gazebo_bridge.server --stdio
+```
+
+### HTTP (streamable HTTP transport)
+```
+uv run python -m ag_gazebo_bridge.server
+```
+
+### Tests
+```
+uv run pytest
+```
+
+### Lint
+```
+uv run ruff check src/
+uv run ruff format src/
+```
+
+## Architecture
+
+```
+Gazebo Sim (gz) ──gz CLI──▶ gazebo-mcp ──REST──▶ yahboom-mcp (physical robot)
+                                                  ├── unity3d-mcp (3D viz)
+                                                  ├── resonite-mcp (VR)
+                                                  ├── freecad-mcp (CAD export)
+                                                  └── robotics-mcp (orchestration)
+```
+
+Transport: stdio (Claude Desktop) or streamable HTTP (browser/CURL).
+
+## Fleet / related MCPs
+
+| Repo | Port | Role |
+|------|------|------|
+| robotics-mcp | 10706 | Fleet orchestration |
+| yahboom-mcp | 10893 | Physical Yahboom robot control |
+| unity3d-mcp | 10831 | 3D visualization / render |
+| resonite-mcp | 10979 | VR spatial sync |
+| freecad-mcp | 10945 | CAD model import/export |
+
+## Troubleshooting
+
+1. **gz not found** — ensure Gazebo Garden/Harmonic is installed and `gz` is on PATH. On Windows, run via WSL2.
+2. **Fleet repo down** — the target MCP server is not running. Start it or check its port.
+3. **Topic publish fails** — verify the simulation is running (`gz sim`), the topic exists, and the message type matches.
+4. **Timeout** — Gazebo commands time out after 15s. Large simulations may need more time.
+5. **Dual transport** — omit `--stdio` to use streamable HTTP transport on the default port.

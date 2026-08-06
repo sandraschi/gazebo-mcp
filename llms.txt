@@ -1,0 +1,35 @@
+# gazebo-mcp (ag-gazebo-bridge)
+
+> FastMCP 3.4 bridge from Gazebo robotics simulation to the fleet robotics mesh.  
+> Wraps `gz` CLI for topic publish, model listing, and service calls; syncs simulation state to yahboom-mcp, unity3d-mcp, resonite-mcp, and freecad-mcp.
+
+## Quick links
+- [README](README.md) — full documentation
+- [Install](docs/INSTALL_GAZEBO.md) — Gazebo + server setup
+- [Fleet standards](https://github.com/sandraschi/mcp-central-docs)
+
+## Tools (summary)
+- `gz_topic_pub` — publish to a Gazebo topic
+- `gz_topic_list` — list active topics
+- `gz_sim_state` — list models in simulation
+- `gz_service_call` — call a Gazebo service
+- `sync_to_yahboom` — push robot command to physical Yahboom
+- `sync_to_unity` — export scene to Unity 3D
+- `sync_to_resonite` — spawn models in Resonite VR
+- `sync_to_freecad` — export model to FreeCAD
+- `fleet_sync_all` — broadcast to all fleet repos
+- `fleet_status` — health check all connected repos
+
+## Ports
+| Service | Port |
+|---------|------|
+| robotics-mcp | 10706 |
+| yahboom-mcp | 10893 |
+| unity3d-mcp | 10831 |
+| resonite-mcp | 10979 |
+| freecad-mcp | 10945 |
+
+## Prompts
+- `gazebo_help` — guidance for simulation control and fleet bridging
+
+Full detail: see [llms-full.txt](llms-full.txt)

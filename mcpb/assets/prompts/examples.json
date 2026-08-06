@@ -1,0 +1,1094 @@
+[
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/rover/cmd_vel",
+      "msg_type": "gz.msgs.Twist",
+      "message": "{linear: {x: 0.5}, angular: {z: 0.0}}"
+    },
+    "output_example": {
+      "success": true,
+      "topic": "/model/rover/cmd_vel",
+      "output": ""
+    }
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/scout/cmd_vel",
+      "msg_type": "gz.msgs.Twist",
+      "message": "{linear: {x: -0.3}}"
+    },
+    "output_example": {
+      "success": true,
+      "topic": "/model/scout/cmd_vel"
+    }
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/drone/command/takeoff",
+      "msg_type": "gz.msgs.Boolean",
+      "message": "{data: true}"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/world/default/light_config",
+      "msg_type": "gz.msgs.Light",
+      "message": "{diffuse: {r: 1.0, g: 0.8, b: 0.6}, attenuation: {range: 50}}"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/rover/pose",
+      "msg_type": "gz.msgs.Pose",
+      "message": "{position: {x: 5.0, y: 3.0, z: 0.0}}"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/world/default/control",
+      "msg_type": "gz.msgs.WorldControl",
+      "message": "{pause: true}"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/scout/color",
+      "msg_type": "gz.msgs.Color",
+      "message": "{r: 0.2, g: 0.6, b: 1.0, a: 1.0}"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/drone/command/land",
+      "msg_type": "gz.msgs.Boolean",
+      "message": "true"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/arm/joint_position",
+      "msg_type": "gz.msgs.Double",
+      "message": "{data: 1.57}"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/gazebo/reset",
+      "msg_type": "gz.msgs.Empty",
+      "message": ""
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_sim_state",
+    "input": {},
+    "output_example": {
+      "success": true,
+      "models": [
+        "rover",
+        "scout",
+        "drone",
+        "ground_plane",
+        "obstacle_1",
+        "building_1"
+      ],
+      "count": 6
+    }
+  },
+  {
+    "tool": "gz_sim_state",
+    "input": {},
+    "output_description": "Returns list of models in simulation with count"
+  },
+  {
+    "tool": "gz_topic_list",
+    "input": {},
+    "output_example": {
+      "success": true,
+      "topics": [
+        "/clock",
+        "/gazebo/reset",
+        "/model/rover/cmd_vel",
+        "/model/rover/pose",
+        "/world/default/light_config",
+        "/world/default/control"
+      ],
+      "count": 6
+    }
+  },
+  {
+    "tool": "gz_topic_list",
+    "input": {},
+    "output_description": "Returns all active Gazebo topics with count"
+  },
+  {
+    "tool": "gz_service_call",
+    "input": {
+      "service": "/gazebo/reset",
+      "req_type": "gz.msgs.Empty",
+      "rep_type": "gz.msgs.Boolean",
+      "request": "",
+      "timeout": 2000
+    },
+    "output_example": {
+      "success": true,
+      "service": "/gazebo/reset",
+      "output": "data: true"
+    }
+  },
+  {
+    "tool": "gz_service_call",
+    "input": {
+      "service": "/world/default/set_physics",
+      "req_type": "gz.msgs.Physics",
+      "rep_type": "gz.msgs.Boolean",
+      "request": "{max_step_size: 0.001, real_time_factor: 1.0}"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_service_call",
+    "input": {
+      "service": "/world/default/create",
+      "req_type": "gz.msgs.EntityFactory",
+      "rep_type": "gz.msgs.Boolean",
+      "request": "{sdf_filename: 'box.sdf', pose: {position: {x: 2, y: 0, z: 1}}}",
+      "timeout": 5000
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_service_call",
+    "input": {
+      "service": "/world/default/remove",
+      "req_type": "gz.msgs.Entity",
+      "rep_type": "gz.msgs.Boolean",
+      "request": "{id: 5, type: MODEL}"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_service_call",
+    "input": {
+      "service": "/model/rover/enable",
+      "req_type": "gz.msgs.Boolean",
+      "rep_type": "gz.msgs.Boolean",
+      "request": "{data: true}"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_service_call",
+    "input": {
+      "service": "/world/default/pose",
+      "req_type": "gz.msgs.Entity",
+      "rep_type": "gz.msgs.Pose_V",
+      "request": "{id: 1, type: MODEL}"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "sync_to_yahboom",
+    "input": {
+      "robot_model": "scout",
+      "command": "move",
+      "params": "{\"linear_velocity\": 0.3, \"angular_velocity\": 0.0}"
+    },
+    "output_example": {
+      "success": true,
+      "robot": "scout",
+      "command": "move"
+    }
+  },
+  {
+    "tool": "sync_to_yahboom",
+    "input": {
+      "robot_model": "scout",
+      "command": "stop"
+    },
+    "output_example": {
+      "success": true,
+      "robot": "scout",
+      "command": "stop"
+    }
+  },
+  {
+    "tool": "sync_to_yahboom",
+    "input": {
+      "robot_model": "scout",
+      "command": "patrol"
+    },
+    "output_example": {
+      "success": true,
+      "robot": "scout",
+      "command": "patrol"
+    }
+  },
+  {
+    "tool": "sync_to_yahboom",
+    "input": {
+      "robot_model": "scout",
+      "command": "scan"
+    },
+    "output_example": {
+      "success": true,
+      "robot": "scout",
+      "command": "scan"
+    }
+  },
+  {
+    "tool": "sync_to_yahboom",
+    "input": {
+      "robot_model": "scout",
+      "command": "move",
+      "params": "{\"linear_velocity\": -0.2}"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "sync_to_unity",
+    "input": {
+      "models": [
+        "rover",
+        "ground_plane",
+        "obstacle_1"
+      ]
+    },
+    "output_example": {
+      "success": true,
+      "models": [
+        "rover",
+        "ground_plane",
+        "obstacle_1"
+      ]
+    }
+  },
+  {
+    "tool": "sync_to_unity",
+    "input": {},
+    "output_example": {
+      "success": true,
+      "models": [
+        "rover",
+        "scout",
+        "drone",
+        "ground_plane",
+        "obstacle_1",
+        "building_1"
+      ]
+    }
+  },
+  {
+    "tool": "sync_to_unity",
+    "input": {
+      "models": [
+        "rover"
+      ]
+    },
+    "output_example": {
+      "success": true,
+      "models": [
+        "rover"
+      ]
+    }
+  },
+  {
+    "tool": "sync_to_unity",
+    "input": {},
+    "output_description": "Default: syncs all simulation models to Unity"
+  },
+  {
+    "tool": "sync_to_resonite",
+    "input": {
+      "models": [
+        "rover"
+      ],
+      "position": "{\"x\": 0, \"y\": 1.5, \"z\": -3}"
+    },
+    "output_example": {
+      "success": true,
+      "models": [
+        "rover"
+      ]
+    }
+  },
+  {
+    "tool": "sync_to_resonite",
+    "input": {
+      "models": [
+        "building_1",
+        "obstacle_1"
+      ]
+    },
+    "output_example": {
+      "success": true,
+      "models": [
+        "building_1",
+        "obstacle_1"
+      ]
+    }
+  },
+  {
+    "tool": "sync_to_resonite",
+    "input": {},
+    "output_example": {
+      "success": true,
+      "models": [
+        "rover",
+        "scout",
+        "drone",
+        "ground_plane",
+        "obstacle_1",
+        "building_1"
+      ]
+    }
+  },
+  {
+    "tool": "sync_to_resonite",
+    "input": {
+      "position": "{\"x\": 10, \"y\": 0, \"z\": 10}"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "sync_to_freecad",
+    "input": {
+      "model": "rover",
+      "format": "step"
+    },
+    "output_example": {
+      "success": true,
+      "model": "rover",
+      "format": "step"
+    }
+  },
+  {
+    "tool": "sync_to_freecad",
+    "input": {
+      "model": "building_1",
+      "format": "stl"
+    },
+    "output_example": {
+      "success": true,
+      "model": "building_1",
+      "format": "stl"
+    }
+  },
+  {
+    "tool": "sync_to_freecad",
+    "input": {
+      "model": "scout",
+      "format": "iges"
+    },
+    "output_example": {
+      "success": true,
+      "model": "scout",
+      "format": "iges"
+    }
+  },
+  {
+    "tool": "sync_to_freecad",
+    "input": {
+      "model": "drone",
+      "format": "fcstd"
+    },
+    "output_example": {
+      "success": true,
+      "model": "drone",
+      "format": "fcstd"
+    }
+  },
+  {
+    "tool": "sync_to_freecad",
+    "input": {
+      "model": "obstacle_1",
+      "format": "step"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "fleet_sync_all",
+    "input": {
+      "models": [
+        "rover",
+        "scout"
+      ]
+    },
+    "output_example": {
+      "success": true,
+      "gazebo_models": [
+        "rover",
+        "scout"
+      ],
+      "repos": {
+        "yahboom": {
+          "alive": true,
+          "synced": true
+        },
+        "unity3d": {
+          "alive": true,
+          "synced": true
+        }
+      }
+    }
+  },
+  {
+    "tool": "fleet_sync_all",
+    "input": {},
+    "output_example": {
+      "success": true,
+      "gazebo_models": [
+        "rover",
+        "scout",
+        "drone"
+      ],
+      "repos": {
+        "yahboom": {
+          "alive": true,
+          "synced": true
+        },
+        "resonite": {
+          "alive": false
+        },
+        "freecad": {
+          "alive": true,
+          "synced": true
+        }
+      }
+    }
+  },
+  {
+    "tool": "fleet_sync_all",
+    "input": {},
+    "output_description": "Broadcasts all sim models to all healthy repos"
+  },
+  {
+    "tool": "fleet_status",
+    "input": {},
+    "output_example": {
+      "success": true,
+      "repos": {
+        "yahboom": {
+          "url": "http://127.0.0.1:10893",
+          "up": true
+        },
+        "unity3d": {
+          "url": "http://127.0.0.1:10831",
+          "up": true
+        },
+        "freecad": {
+          "url": "http://127.0.0.1:10945",
+          "up": false
+        }
+      },
+      "alive": 4,
+      "total": 5
+    }
+  },
+  {
+    "tool": "fleet_status",
+    "input": {},
+    "output_description": "Returns per-repo health status with alive count"
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/rover/cmd_vel",
+      "msg_type": "gz.msgs.Twist",
+      "message": "linear: {x: 1.0, y: 0.0, z: 0.0}"
+    },
+    "output_description": "Sends forward velocity command to rover"
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/rover/cmd_vel",
+      "msg_type": "gz.msgs.Twist",
+      "message": "{angular: {z: 0.5}}"
+    },
+    "output_description": "Sends rotation command to rover"
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/world/default/control",
+      "msg_type": "gz.msgs.WorldControl",
+      "message": "{pause: false}"
+    },
+    "output_description": "Unpauses the simulation"
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/rover/color",
+      "msg_type": "gz.msgs.Color",
+      "message": "{r: 1.0, g: 0.0, b: 0.0, a: 1.0}"
+    },
+    "output_description": "Changes rover color to red"
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/drone/command/velocity",
+      "msg_type": "gz.msgs.Velocity",
+      "message": "{linear: {x: 0, y: 0, z: 2}}"
+    },
+    "output_description": "Commands drone to ascend"
+  },
+  {
+    "tool": "gz_service_call",
+    "input": {
+      "service": "/world/default/create",
+      "req_type": "gz.msgs.EntityFactory",
+      "rep_type": "gz.msgs.Boolean",
+      "request": "{sdf: '<?xml version=\"1.0\"?><sdf><model name=\"box\"><link><collision><geometry><box><size>1 1 1</size></box></geometry></collision></link></model></sdf>'}",
+      "timeout": 3000
+    },
+    "output_description": "Spawns a 1m box model via inline SDF"
+  },
+  {
+    "tool": "gz_service_call",
+    "input": {
+      "service": "/model/rover/odometry",
+      "req_type": "gz.msgs.Empty",
+      "rep_type": "gz.msgs.Odometry",
+      "request": "",
+      "timeout": 1000
+    },
+    "output_description": "Gets odometry data for rover model"
+  },
+  {
+    "tool": "gz_topic_list",
+    "input": {},
+    "output_description": "Lists all active topics for discovery"
+  },
+  {
+    "tool": "gz_sim_state",
+    "input": {},
+    "output_description": "Lists all models in the current sim"
+  },
+  {
+    "tool": "sync_to_yahboom",
+    "input": {
+      "robot_model": "scout",
+      "command": "patrol",
+      "params": "{\"pattern\": \"cross\", \"speed\": 0.5}"
+    },
+    "output_description": "Starts cross-pattern patrol with scout robot"
+  },
+  {
+    "tool": "sync_to_yahboom",
+    "input": {
+      "robot_model": "scout",
+      "command": "stop"
+    },
+    "output_description": "Stops physical Yahboom robot"
+  },
+  {
+    "tool": "sync_to_yahboom",
+    "input": {
+      "robot_model": "scout",
+      "command": "scan"
+    },
+    "output_description": "Starts scan behavior on Yahboom robot"
+  },
+  {
+    "tool": "sync_to_unity",
+    "input": {
+      "models": [
+        "building_1"
+      ]
+    },
+    "output_description": "Syncs building model to Unity"
+  },
+  {
+    "tool": "sync_to_unity",
+    "input": {},
+    "output_description": "Syncs all sim models to Unity"
+  },
+  {
+    "tool": "sync_to_resonite",
+    "input": {
+      "models": [
+        "rover"
+      ],
+      "position": "{\"x\": 5, \"y\": 0, \"z\": 0}"
+    },
+    "output_description": "Syncs rover to Resonite at position 5,0,0"
+  },
+  {
+    "tool": "sync_to_resonite",
+    "input": {},
+    "output_description": "Syncs all models to Resonite VR"
+  },
+  {
+    "tool": "sync_to_freecad",
+    "input": {
+      "model": "building_1",
+      "format": "stl"
+    },
+    "output_description": "Exports building model as STL for 3D printing"
+  },
+  {
+    "tool": "sync_to_freecad",
+    "input": {
+      "model": "rover",
+      "format": "fcstd"
+    },
+    "output_description": "Exports rover as native FreeCAD format"
+  },
+  {
+    "tool": "fleet_sync_all",
+    "input": {},
+    "output_description": "Broadcasts all models to all healthy fleet repos"
+  },
+  {
+    "tool": "fleet_status",
+    "input": {},
+    "output_description": "Health check all connected fleet repos"
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/scout/cmd_vel",
+      "msg_type": "gz.msgs.Twist",
+      "message": "angular: {z: 1.0}"
+    },
+    "output_description": "Sends rotation-only command to scout"
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/world/default/control",
+      "msg_type": "gz.msgs.WorldControl",
+      "message": "multi_step: 100"
+    },
+    "output_description": "Steps simulation forward by 100 iterations"
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/drone/command/takeoff",
+      "msg_type": "gz.msgs.Boolean",
+      "message": "true"
+    },
+    "output_description": "Commands drone to take off"
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/drone/command/land",
+      "msg_type": "gz.msgs.Boolean",
+      "message": "true"
+    },
+    "output_description": "Commands drone to land"
+  },
+  {
+    "tool": "gz_service_call",
+    "input": {
+      "service": "/world/default/remove",
+      "req_type": "gz.msgs.Entity",
+      "rep_type": "gz.msgs.Boolean",
+      "request": "{id: 3, type: MODEL}",
+      "timeout": 2000
+    },
+    "output_description": "Removes model with ID 3 from simulation"
+  },
+  {
+    "tool": "gz_service_call",
+    "input": {
+      "service": "/gazerver/world/visualize",
+      "req_type": "gz.msgs.Empty",
+      "rep_type": "gz.msgs.Boolean",
+      "request": ""
+    },
+    "output_example": {
+      "success": false,
+      "service": "/gazerver/world/visualize",
+      "output": "Gazebo command timed out"
+    }
+  },
+  {
+    "tool": "gz_service_call",
+    "input": {
+      "service": "/world/default/set_physics",
+      "req_type": "gz.msgs.Physics",
+      "rep_type": "gz.msgs.Boolean",
+      "request": "{real_time_factor: 0.5}"
+    },
+    "output_description": "Slows simulation to 0.5x real time"
+  },
+  {
+    "tool": "fleet_sync_all",
+    "input": {},
+    "output_example": {
+      "success": true,
+      "gazebo_models": [],
+      "repos": {}
+    },
+    "output_description": "No models in sim, only reports repo health"
+  },
+  {
+    "tool": "sync_to_unity",
+    "input": {
+      "models": []
+    },
+    "output_description": "Syncs with empty model list"
+  },
+  {
+    "tool": "sync_to_resonite",
+    "input": {
+      "models": []
+    },
+    "output_description": "Syncs empty list to Resonite"
+  },
+  {
+    "tool": "sync_to_yahboom",
+    "input": {
+      "robot_model": "non_existent_model",
+      "command": "move"
+    },
+    "output_description": "Fails gracefully if model not found"
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/non/existent/topic",
+      "msg_type": "gz.msgs.Empty",
+      "message": ""
+    },
+    "output_description": "Publish to non-existent topic returns error"
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/rover/cmd_vel",
+      "msg_type": "gz.msgs.Twist",
+      "message": "{linear: {x: 0.5}, angular: {z: 0.5}}"
+    },
+    "output_description": "Forward + rotation combined command"
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/scout/pose",
+      "msg_type": "gz.msgs.Pose",
+      "message": "{position: {x: 10, y: 5, z: 0}}"
+    },
+    "output_description": "Teleports scout to position 10,5,0"
+  },
+  {
+    "tool": "gz_service_call",
+    "input": {
+      "service": "/world/default/pose",
+      "req_type": "gz.msgs.Entity",
+      "rep_type": "gz.msgs.Pose_V",
+      "request": "{id: 1, type: MODEL}",
+      "timeout": 2000
+    },
+    "output_description": "Gets pose of first model in world"
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/scout/cmd_vel",
+      "msg_type": "gz.msgs.Twist",
+      "message": "linear: {x: 0.1}"
+    },
+    "output_description": "Slow crawl command for precision movement"
+  },
+  {
+    "tool": "sync_to_freecad",
+    "input": {
+      "model": "obstacle_1",
+      "format": "stl"
+    },
+    "output_description": "Exports obstacle as printable STL"
+  },
+  {
+    "tool": "sync_to_freecad",
+    "input": {
+      "model": "ground_plane",
+      "format": "step"
+    },
+    "output_description": "Exports ground plane as STEP for CAD"
+  },
+  {
+    "tool": "sync_to_unity",
+    "input": {
+      "models": [
+        "drone",
+        "building_1"
+      ]
+    },
+    "output_description": "Syncs drone and building to Unity scene"
+  },
+  {
+    "tool": "fleet_sync_all",
+    "input": {
+      "models": [
+        "rover"
+      ]
+    },
+    "output_description": "Broadcasts single model to all repos"
+  },
+  {
+    "tool": "gz_topic_list",
+    "input": {},
+    "output_description": "Discovers all available Gazebo topics"
+  },
+  {
+    "tool": "gz_sim_state",
+    "input": {},
+    "output_description": "Lists all models for inspection"
+  },
+  {
+    "tool": "gz_service_call",
+    "input": {
+      "service": "/world/default/create",
+      "req_type": "gz.msgs.EntityFactory",
+      "rep_type": "gz.msgs.Boolean",
+      "request": "{sdf_filename: 'robot.sdf'}",
+      "timeout": 5000
+    },
+    "output_description": "Spawns robot.sdf into the simulation"
+  },
+  {
+    "tool": "sync_to_yahboom",
+    "input": {
+      "robot_model": "scout",
+      "command": "move",
+      "params": "{\"duration\": 10}"
+    },
+    "output_description": "Moves robot for 10 seconds"
+  },
+  {
+    "tool": "sync_to_resonite",
+    "input": {
+      "models": [
+        "rover"
+      ],
+      "position": "{\"x\": 0, \"y\": 2, \"z\": -10}"
+    },
+    "output_description": "Places rover 10 units in front in VR"
+  },
+  {
+    "tool": "sync_to_unity",
+    "input": {
+      "models": [
+        "rover",
+        "scout"
+      ]
+    },
+    "output_description": "Syncs two robots to Unity scene"
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/test_89/cmd_vel",
+      "msg_type": "gz.msgs.Twist",
+      "message": "{linear: {x: 0.1}}"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_sim_state",
+    "input": {},
+    "output_example": {
+      "success": true,
+      "models": [
+        "model_89"
+      ],
+      "count": 1
+    }
+  },
+  {
+    "tool": "fleet_status",
+    "input": {},
+    "output_example": {
+      "success": true,
+      "alive": 4
+    }
+  },
+  {
+    "tool": "sync_to_freecad",
+    "input": {
+      "model": "model_89",
+      "format": "step"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/test_90/cmd_vel",
+      "msg_type": "gz.msgs.Twist",
+      "message": "{linear: {x: 0.1}}"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_sim_state",
+    "input": {},
+    "output_example": {
+      "success": true,
+      "models": [
+        "model_90"
+      ],
+      "count": 1
+    }
+  },
+  {
+    "tool": "fleet_status",
+    "input": {},
+    "output_example": {
+      "success": true,
+      "alive": 0
+    }
+  },
+  {
+    "tool": "sync_to_freecad",
+    "input": {
+      "model": "model_90",
+      "format": "step"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/test_91/cmd_vel",
+      "msg_type": "gz.msgs.Twist",
+      "message": "{linear: {x: 0.1}}"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_sim_state",
+    "input": {},
+    "output_example": {
+      "success": true,
+      "models": [
+        "model_91"
+      ],
+      "count": 1
+    }
+  },
+  {
+    "tool": "fleet_status",
+    "input": {},
+    "output_example": {
+      "success": true,
+      "alive": 1
+    }
+  },
+  {
+    "tool": "sync_to_freecad",
+    "input": {
+      "model": "model_91",
+      "format": "step"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_topic_pub",
+    "input": {
+      "topic": "/model/test_92/cmd_vel",
+      "msg_type": "gz.msgs.Twist",
+      "message": "{linear: {x: 0.1}}"
+    },
+    "output_example": {
+      "success": true
+    }
+  },
+  {
+    "tool": "gz_sim_state",
+    "input": {},
+    "output_example": {
+      "success": true,
+      "models": [
+        "model_92"
+      ],
+      "count": 1
+    }
+  },
+  {
+    "tool": "fleet_status",
+    "input": {},
+    "output_example": {
+      "success": true,
+      "alive": 2
+    }
+  },
+  {
+    "tool": "sync_to_freecad",
+    "input": {
+      "model": "model_92",
+      "format": "step"
+    },
+    "output_example": {
+      "success": true
+    }
+  }
+]
