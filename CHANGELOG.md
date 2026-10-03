@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased] (assfix 2026-10-02, first full pass)
+- Launcher fix: `WorkDir` + dual `PythonPath` in fleet config (`server:app` was unimportable)
+- `gazebo_shutdown` tool (stops sims first) + `GET /api/capabilities`; diagnostics updated to 15 tools
+- Standard annotation hint shapes; `Context | None` + asserts (ty clean); union `.lower()` coercion
+- `.gitignore`: `reports/`, `*.bak.*`; restored `scripts/mcpb-pack.ps1` as shim to `mcpb/pack.ps1`
+
 ## 0.2.0 (2026-07-04)
 
 Full fleet certification: NSIS build pipeline, standard compliance, session injection, Biome, Docker.

@@ -1,6 +1,6 @@
 # gazebo-mcp
 
-A general-purpose Gazebo simulation server via MCP (14 tools).
+A general-purpose Gazebo simulation server via MCP (15 tools).
 
 ## Tools
 - sim_status — health check
@@ -12,6 +12,7 @@ A general-purpose Gazebo simulation server via MCP (14 tools).
 - natural_language_control — NL to topic commands
 - analyze_sim_state / analyze_sim_logs — AI analysis
 - discover_model — AI-powered model discovery
+- gazebo_shutdown — stop sims + terminate server (confirm-gated)
 
 All tools annotated with READ_ONLY / MUTATING for agent safety.
 
