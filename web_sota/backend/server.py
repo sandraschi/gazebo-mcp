@@ -106,7 +106,7 @@ async def diagnostics():
         "server": "gazebo-mcp",
         "version": "0.2.0",
         "uptime_seconds": int(time.time() - _server_start_time),
-        "tool_count": 14,
+        "tool_count": 15,
         "tools": [
             {"name": "sim_status"},
             {"name": "load_world"},
@@ -122,6 +122,7 @@ async def diagnostics():
             {"name": "analyze_sim_state"},
             {"name": "analyze_sim_logs"},
             {"name": "discover_model"},
+            {"name": "gazebo_shutdown"},
         ],
         "system": {"windows": sys.platform == "win32"},
         "errors": [],
@@ -131,6 +132,45 @@ async def diagnostics():
 @app.get("/api/status")
 async def status():
     return sim_status()
+
+
+@app.get("/api/capabilities")
+async def capabilities():
+    """Standard fleet shape for webapp discovery."""
+    return {
+        "service": "gazebo-mcp",
+        "version": "0.2.0",
+        "status": "ok",
+        "tool_count": 15,
+        "tools": [
+            "sim_status",
+            "load_world",
+            "spawn_model",
+            "start_sim",
+            "stop_sim",
+            "get_state",
+            "apply_control",
+            "list_worlds",
+            "list_jobs",
+            "agentic_sim_workflow",
+            "natural_language_control",
+            "analyze_sim_state",
+            "analyze_sim_logs",
+            "discover_model",
+            "gazebo_shutdown",
+        ],
+        "endpoints": [
+            "/health",
+            "/api/health",
+            "/api/capabilities",
+            "/api/status",
+            "/api/worlds",
+            "/api/simulations",
+            "/api/llm/chat",
+            "/mcp",
+        ],
+        "transports": ["http", "stdio"],
+    }
 
 
 @app.get("/api/worlds")

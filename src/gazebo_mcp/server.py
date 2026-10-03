@@ -12,8 +12,24 @@ from fastmcp import Context, FastMCP
 
 mcp = FastMCP("gazebo-mcp")
 
-_READ_ONLY = {"readonly": True}
-_MUTATING = {}
+_READ_ONLY = {
+    "readOnlyHint": True,
+    "destructiveHint": False,
+    "idempotentHint": True,
+    "openWorldHint": False,
+}
+_MUTATING = {
+    "readOnlyHint": False,
+    "destructiveHint": False,
+    "idempotentHint": False,
+    "openWorldHint": False,
+}
+_DESTRUCTIVE = {
+    "readOnlyHint": False,
+    "destructiveHint": True,
+    "idempotentHint": False,
+    "openWorldHint": False,
+}
 _OLLAMA_MODEL = os.environ.get("GAZEBO_MCP_OLLAMA_MODEL", "llama3.2:3b")
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -260,7 +276,7 @@ def start_sim(world_name: str, headless: bool = True, extra_args: str = "") -> d
     job_dir.mkdir(parents=True, exist_ok=True)
     # Log to file, never PIPE: undrained pipes deadlock chatty sims.
     log_path = job_dir / "runner.log"
-    log_fh = open(log_path, "w", encoding="utf-8")  # noqa: SIM115 — owned by child
+    log_fh = open(log_path, "w", encoding="utf-8")  # noqa: SIM115 - owned by child
     try:
         proc = subprocess.Popen(cmd, stdout=log_fh, stderr=subprocess.STDOUT)
     except FileNotFoundError:
@@ -505,7 +521,7 @@ def _extract_json_array(text: str) -> list:
 
 
 @mcp.tool(annotations=_MUTATING)
-async def agentic_sim_workflow(goal: str, ctx: Context) -> dict:
+async def agentic_sim_workflow(goal: str, ctx: Context | None = None) -> dict:
     """Execute an autonomous multi-step simulation workflow using the host LLM.
 
     The LLM plans a sequence of tool calls (start_sim, get_state, apply_control,
@@ -521,19 +537,19 @@ async def agentic_sim_workflow(goal: str, ctx: Context) -> dict:
     """
     tools_desc = """
 Available tools (invoke with JSON):
-- sim_status() — health check
-- load_world(uri, name) — download SDF world
-- spawn_model(uri, name, world) — spawn model into running sim
-- start_sim(world_name, headless) — launch gz sim, returns job_id
-- stop_sim(job_id) — stop sim
-- get_state(job_id) — read process state
-- apply_control(job_id, topic, command) — publish to Gazebo topic
-- list_worlds() — show depot worlds
-- list_jobs() — show active/completed jobs
-- natural_language_control(prompt, job_id, ctx) — NL to topic command
-- analyze_sim_state(job_id, ctx) — describe sim state
-- analyze_sim_logs(job_id, ctx) — diagnose sim issues
-- discover_model(description, ctx) — find SDF/URDF models
+- sim_status() - health check
+- load_world(uri, name) - download SDF world
+- spawn_model(uri, name, world) - spawn model into running sim
+- start_sim(world_name, headless) - launch gz sim, returns job_id
+- stop_sim(job_id) - stop sim
+- get_state(job_id) - read process state
+- apply_control(job_id, topic, command) - publish to Gazebo topic
+- list_worlds() - show depot worlds
+- list_jobs() - show active/completed jobs
+- natural_language_control(prompt, job_id, ctx) - NL to topic command
+- analyze_sim_state(job_id, ctx) - describe sim state
+- analyze_sim_logs(job_id, ctx) - diagnose sim issues
+- discover_model(description, ctx) - find SDF/URDF models
 """
     prompt = f"""You are a robotics simulation engineer. Your goal: {goal}
 
@@ -543,6 +559,7 @@ Plan and execute the steps. Show your reasoning before each tool call.
 After completion, summarize what happened and any observations."""
 
     try:
+        assert ctx is not None  # None falls through to the Ollama fallback below
         result = await ctx.sample(prompt)
         text = getattr(result, "text", None) or str(result)
         return {
@@ -573,7 +590,9 @@ After completion, summarize what happened and any observations."""
 
 
 @mcp.tool(annotations=_MUTATING)
-async def natural_language_control(prompt: str, job_id: str, ctx: Context) -> dict:
+async def natural_language_control(
+    prompt: str, job_id: str, ctx: Context | None = None
+) -> dict:
     """Convert a natural language command to a Gazebo topic command for a running sim.
 
     Reads the job's metadata.json for world info, then asks the LLM to produce
@@ -603,6 +622,7 @@ Example: {{"topic": "/model/vehicle/cmd_vel", "command": "linear: {{x: 0.5}}"}}"
 
     sampling_used = False
     try:
+        assert ctx is not None  # None falls through to the Ollama fallback below
         result = await ctx.sample(nl_prompt)
         text = getattr(result, "text", None) or str(result)
         sampling_used = True
@@ -660,7 +680,7 @@ Example: {{"topic": "/model/vehicle/cmd_vel", "command": "linear: {{x: 0.5}}"}}"
 
 
 @mcp.tool(annotations=_READ_ONLY)
-async def analyze_sim_state(job_id: str, ctx: Context) -> dict:
+async def analyze_sim_state(job_id: str, ctx: Context | None = None) -> dict:
     """Read the current sim state and produce a natural-language analysis.
 
     Analyzes process state, stderr, and metadata to describe what the
@@ -714,6 +734,7 @@ Describe in plain English:
 4. Recommendations for next steps."""
 
     try:
+        assert ctx is not None  # None falls through to the Ollama fallback below
         result = await ctx.sample(analyze_prompt)
         text = getattr(result, "text", None) or str(result)
         return {
@@ -744,7 +765,7 @@ Describe in plain English:
 
 
 @mcp.tool(annotations=_READ_ONLY)
-async def analyze_sim_logs(job_id: str, ctx: Context) -> dict:
+async def analyze_sim_logs(job_id: str, ctx: Context | None = None) -> dict:
     """Read the sim stderr log and ask the LLM for root-cause analysis.
 
     Checks for error output and process status. Useful after a sim crash
@@ -786,6 +807,7 @@ Provide:
 3. Specific suggestions to fix or improve"""
 
     try:
+        assert ctx is not None  # None falls through to the Ollama fallback below
         result = await ctx.sample(log_prompt)
         text = getattr(result, "text", None) or str(result)
         return {
@@ -812,7 +834,7 @@ Provide:
 
 
 @mcp.tool(annotations=_MUTATING)
-async def discover_model(description: str, ctx: Context) -> dict:
+async def discover_model(description: str, ctx: Context | None = None) -> dict:
     """Search for and suggest Gazebo SDF/URDF model URLs from a natural-language description.
 
     The LLM generates candidate GitHub raw URLs or Gazebo Fuel URLs based on
@@ -833,6 +855,7 @@ Return ONLY a JSON array of URLs, nothing else.
 Example: ["https://fuel.gazebosim.org/1.0/OpenRobotics/models/Thrall_V2/model.sdf"]"""
 
     try:
+        assert ctx is not None  # None falls through to the Ollama fallback below
         result = await ctx.sample(prompt)
         urls = _extract_json_array(getattr(result, "text", None) or str(result))
     except Exception:
@@ -865,6 +888,39 @@ Example: ["https://fuel.gazebosim.org/1.0/OpenRobotics/models/Thrall_V2/model.sd
         "message": f"Checked {len(urls)} URLs.",
         "models_suggested": [f for f in found if f["reachable"]],
         "urls_tried": urls,
+    }
+
+
+@mcp.tool(annotations=_DESTRUCTIVE)
+def gazebo_shutdown(confirmed: bool = False) -> dict:
+    """Shut down the gazebo-mcp server: stop active sims, then terminate.
+
+    ## Return Format
+    {"success": bool, "stopped_jobs": [str], "message": str}
+
+    ## Examples
+    gazebo_shutdown(confirmed=True)
+    """
+    if not confirmed:
+        return {
+            "success": False,
+            "message": "Refusing: pass confirmed=true to stop active sims and terminate the server.",
+        }
+    stopped = []
+    for job_id in list(_jobs):
+        try:
+            stop_sim(job_id)
+            stopped.append(job_id)
+        except Exception:
+            pass
+    import os as _os
+    import signal as _signal
+
+    _os.kill(_os.getpid(), _signal.SIGTERM)
+    return {
+        "success": True,
+        "stopped_jobs": stopped,
+        "message": "gazebo-mcp server terminating.",
     }
 
 

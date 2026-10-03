@@ -55,7 +55,8 @@ async def list_fuel(search: str = "", tag: str = ""):
         results = [
             m
             for m in results
-            if q in m["name"].lower() or q in m.get("description", "").lower()
+            if q in str(m["name"]).lower()
+            or q in str(m.get("description") or "").lower()
         ]
     if tag:
         results = [m for m in results if tag in [t.lower() for t in m.get("tags", [])]]
