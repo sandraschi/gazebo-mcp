@@ -1,5 +1,6 @@
 """FastAPI backend for the gazebo-mcp web dashboard."""
 
+import asyncio
 import os
 import sys
 import time
@@ -204,7 +205,9 @@ async def sim_state(job_id: str):
 
 @app.post("/api/worlds/load")
 async def world_load(body: dict):
-    return load_world(uri=body.get("uri", ""), name=body.get("name", ""))
+    return await asyncio.to_thread(
+        load_world, uri=body.get("uri", ""), name=body.get("name", "")
+    )
 
 
 @app.get("/api/llm/providers")
@@ -212,7 +215,9 @@ async def llm_providers():
     import httpx
 
     try:
-        r = httpx.get("http://127.0.0.1:11434/api/tags", timeout=3)
+        r = await asyncio.to_thread(
+            httpx.get, "http://127.0.0.1:11434/api/tags", timeout=3
+        )
         return {"ollama": r.json().get("models", [{"name": "llama3.2:3b"}])}
     except Exception:
         return {"ollama": [{"name": "llama3.2:3b"}]}
@@ -223,7 +228,8 @@ async def llm_chat(body: dict):
     import httpx
 
     try:
-        resp = httpx.post(
+        resp = await asyncio.to_thread(
+            httpx.post,
             "http://127.0.0.1:11434/api/generate",
             json={
                 "model": body.get("model", "llama3.2:3b"),

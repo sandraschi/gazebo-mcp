@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import re
@@ -570,7 +571,8 @@ After completion, summarize what happened and any observations."""
         }
     except Exception as e:
         try:
-            resp = httpx.post(
+            resp = await asyncio.to_thread(
+                httpx.post,
                 "http://127.0.0.1:11434/api/generate",
                 json={"model": _OLLAMA_MODEL, "prompt": prompt, "stream": False},
                 timeout=120,
@@ -628,7 +630,8 @@ Example: {{"topic": "/model/vehicle/cmd_vel", "command": "linear: {{x: 0.5}}"}}"
         sampling_used = True
     except Exception:
         try:
-            resp = httpx.post(
+            resp = await asyncio.to_thread(
+                httpx.post,
                 "http://127.0.0.1:11434/api/generate",
                 json={"model": _OLLAMA_MODEL, "prompt": nl_prompt, "stream": False},
                 timeout=30,
@@ -645,7 +648,7 @@ Example: {{"topic": "/model/vehicle/cmd_vel", "command": "linear: {{x: 0.5}}"}}"
             "raw_llm_output": text,
         }
 
-    gz = _find_gz()
+    gz = await asyncio.to_thread(_find_gz)
     if gz:
         cmd = [
             *gz,
@@ -658,7 +661,9 @@ Example: {{"topic": "/model/vehicle/cmd_vel", "command": "linear: {{x: 0.5}}"}}"
             ctrl.get("command", ""),
         ]
         try:
-            subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+            await asyncio.to_thread(
+                subprocess.run, cmd, capture_output=True, text=True, timeout=10
+            )
         except Exception:
             pass
 
@@ -745,7 +750,8 @@ Describe in plain English:
         }
     except Exception:
         try:
-            resp = httpx.post(
+            resp = await asyncio.to_thread(
+                httpx.post,
                 "http://127.0.0.1:11434/api/generate",
                 json={
                     "model": _OLLAMA_MODEL,
@@ -818,7 +824,8 @@ Provide:
         }
     except Exception:
         try:
-            resp = httpx.post(
+            resp = await asyncio.to_thread(
+                httpx.post,
                 "http://127.0.0.1:11434/api/generate",
                 json={"model": _OLLAMA_MODEL, "prompt": log_prompt, "stream": False},
                 timeout=30,
@@ -860,7 +867,8 @@ Example: ["https://fuel.gazebosim.org/1.0/OpenRobotics/models/Thrall_V2/model.sd
         urls = _extract_json_array(getattr(result, "text", None) or str(result))
     except Exception:
         try:
-            resp = httpx.post(
+            resp = await asyncio.to_thread(
+                httpx.post,
                 "http://127.0.0.1:11434/api/generate",
                 json={"model": _OLLAMA_MODEL, "prompt": prompt, "stream": False},
                 timeout=30,
@@ -878,7 +886,9 @@ Example: ["https://fuel.gazebosim.org/1.0/OpenRobotics/models/Thrall_V2/model.sd
     found = []
     for url in urls[:4]:
         try:
-            resp = httpx.head(url, follow_redirects=True, timeout=15)
+            resp = await asyncio.to_thread(
+                httpx.head, url, follow_redirects=True, timeout=15
+            )
             found.append({"url": url, "reachable": resp.status_code < 400})
         except Exception:
             found.append({"url": url, "reachable": False})

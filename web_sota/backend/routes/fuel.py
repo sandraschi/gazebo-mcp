@@ -1,5 +1,6 @@
 """Gazebo Fuel model browser — list, search, and download worlds."""
 
+import asyncio
 import sys
 from pathlib import Path
 
@@ -26,7 +27,9 @@ async def list_fuel(search: str = "", tag: str = ""):
         all_models = []
         page = 1
         while True:
-            resp = httpx.get(f"{_FUEL_API}?page={page}&per_page=50", timeout=15)
+            resp = await asyncio.to_thread(
+                httpx.get, f"{_FUEL_API}?page={page}&per_page=50", timeout=15
+            )
             resp.raise_for_status()
             data = resp.json()
             if not data:
@@ -93,7 +96,9 @@ async def load_from_fuel(body: dict):
     else:
         url = name
     try:
-        resp = httpx.get(url, follow_redirects=True, timeout=60)
+        resp = await asyncio.to_thread(
+            httpx.get, url, follow_redirects=True, timeout=60
+        )
         resp.raise_for_status()
         dest.write_bytes(resp.content)
         depot[safe_name] = {"uri": url, "path": str(dest.resolve())}
