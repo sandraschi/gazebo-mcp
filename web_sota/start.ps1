@@ -7,7 +7,7 @@ if ($Headless -and ($Host.UI.RawUI.WindowTitle -notmatch 'Hidden')) {
 $WindowStyle = if ($Headless) { 'Hidden' } else { 'Normal' }
 
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
-$WebPort = 10990
+$WebPort = 11176
 
 function Clear-Port {
     param([int]$Port)
@@ -24,7 +24,7 @@ function Clear-Port {
     return $false
 }
 
-Write-Host "`n=== Gazebo MCP ===" -ForegroundColor Cyan
+Write-Host "`n=== ag-gazebo-bridge ===" -ForegroundColor Cyan
 Clear-Port $WebPort | Out-Null
 Set-Location $PSScriptRoot
 if (-not (Test-Path "node_modules")) { npm install }
