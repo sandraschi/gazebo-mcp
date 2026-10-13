@@ -1,4 +1,4 @@
-﻿# Per-repo fleet start config for gazebo-mcp
+# Per-repo fleet start config for gazebo-mcp
 # Edit ports/backend target here - start.ps1 is fleet-standard.
 @{
     Name         = 'gazebo-mcp'
@@ -12,6 +12,7 @@
         WorkDir       = 'web_sota/backend'
         PythonPath    = 'web_sota/backend;.'
         SyncExtras    = @('dev')
+        SyncOnStart  = $true
         Env           = @{ WEB_PORT = '10991' }
     }
     Frontend = @{
