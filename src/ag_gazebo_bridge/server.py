@@ -1,4 +1,4 @@
-"""ag-gazebo-bridge — Gazebo simulation → fleet robotics mesh.
+"""ag-gazebo-bridge - Gazebo simulation → fleet robotics mesh.
 
 Bridges Gazebo's gz-transport to the robotics fleet:
     robotics-mcp, yahboom-mcp, unity3d-mcp, resonite-mcp, freecad-mcp.
@@ -54,7 +54,7 @@ async def gazebo_lifespan(server: FastMCP) -> AsyncIterator[dict]:
         await _client.aclose()
 
 
-mcp = FastMCP("gazebo-mcp", lifespan=gazebo_lifespan)
+mcp = FastMCP("ag-gazebo-bridge", lifespan=gazebo_lifespan)
 
 # ── Fleet port config (from WEBAPP_PORTS.md) ──────────────────────────────
 
@@ -113,7 +113,7 @@ async def _gz_run(*args: str) -> tuple[bool, str]:
     except TimeoutError:
         return False, "Gazebo command timed out"
     except FileNotFoundError:
-        return False, "Gazebo not found — is gz (Gazebo Garden/Harmonic) installed and on PATH?"
+        return False, "Gazebo not found - is gz (Gazebo Garden/Harmonic) installed and on PATH?"
     except Exception as e:
         return False, str(e)
 
@@ -288,7 +288,7 @@ async def fleet_status() -> dict[str, Any]:
 
 @mcp.tool(app=True, annotations=_READ_ONLY)
 async def fleet_status_app() -> PrefabApp:
-    """Health check all connected fleet repos — rich card view."""
+    """Health check all connected fleet repos - rich card view."""
     status = {}
     alive = 0
     for name, url in FLEET_PORTS.items():
@@ -307,7 +307,7 @@ async def fleet_status_app() -> PrefabApp:
 
     with Card() as card:
         with CardHeader():
-            CardTitle(f"Fleet Status — {alive}/{len(FLEET_PORTS)}")
+            CardTitle(f"Fleet Status - {alive}/{len(FLEET_PORTS)}")
         with CardContent():
             Markdown(markdown)
 
@@ -316,7 +316,7 @@ async def fleet_status_app() -> PrefabApp:
 
 @mcp.tool(app=True, annotations=_READ_ONLY)
 async def gz_sim_state_app() -> PrefabApp:
-    """List all models currently in the Gazebo simulation — rich card view."""
+    """List all models currently in the Gazebo simulation - rich card view."""
     ok, output = await _gz_run("model", "--list")
     if not ok:
         with Card() as card, CardContent():
@@ -337,7 +337,7 @@ async def gz_sim_state_app() -> PrefabApp:
 
     with Card() as card:
         with CardHeader():
-            CardTitle(f"Gazebo Models — {len(models)} total")
+            CardTitle(f"Gazebo Models - {len(models)} total")
         with CardContent():
             Markdown(markdown)
 
