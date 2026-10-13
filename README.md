@@ -1,4 +1,4 @@
-# gazebo-mcp
+# ag-gazebo-bridge
 
 <p align="center">
   <a href="https://github.com/casey/just"><img src="https://img.shields.io/badge/just-ready_to_go-7c5cfc?style=flat-square&logo=just&logoColor=white" alt="Just"></a>
@@ -16,7 +16,7 @@
 
 </div>
 
-FastMCP 3.2 bridge from [Gazebo](https://gazebosim.org) robotics simulation to the fleet robotics mesh.
+FastMCP 3.2 AutoGrounding bridge from [Gazebo](https://gazebosim.org) robotics simulation to the fleet robotics mesh. Distinct from [gazebo-mcp](https://github.com/sandraschi/gazebo-mcp), which owns and runs the Gazebo simulator itself (worlds, jobs, physics stepping) — this repo assumes a simulation is already running and relays its state outward to the rest of the fleet.
 
 > Gazebo is a **3D robotics simulator** — it's like a video game engine for robots. You spawn a virtual robot in a virtual world, give it physics, sensors, and cameras, then run AI agents against it. When your code works in simulation, you push it to the physical robot.
 
@@ -27,7 +27,7 @@ Before you send commands to a $50,000 robot arm or a Yahboom rover, you test the
 - **Physics**: gravity, collisions, friction — real physics, not game physics
 - **Sensors**: LIDAR, cameras, IMUs, depth sensors — virtual versions of real hardware
 - **Worlds**: factory floors, warehouses, Mars rovers — any environment
-- **ROS2 integration**: native `gz-transport` middleware
+- **gz-transport middleware**: topic-based pub/sub (a separate `ros_gz_bridge` is needed for actual ROS 2 interop — not built into this repo)
 
 This MCP server wraps Gazebo's command-line tools (`gz`) and bridges simulation state to the rest of the fleet — Unity for visualization, Resonite for VR, Yahboom for physical hardware, FreeCAD for CAD export.
 
@@ -41,15 +41,18 @@ This MCP server wraps Gazebo's command-line tools (`gz`) and bridges simulation 
          │                   │                   │
          │    ┌──────────────┴───────────────────┘
          │    │
-    ┌────▼────▼───┐    ┌──────────────┐    ┌──────────────┐
-    │ gazebo-mcp  │───▶│ yahboom-mcp  │    │ freecad-mcp  │
-    │  (bridge)   │    │ (hardware)   │    │  (CAD)       │
-    └─────────────┘    └──────────────┘    └──────────────┘
+    ┌────▼────▼──────────┐  ┌──────────────┐    ┌──────────────┐
+    │ ag-gazebo-bridge    │─▶│ yahboom-mcp  │    │ freecad-mcp  │
+    │ (this repo)         │  │ (hardware)   │    │  (CAD)       │
+    └─────────────────────┘  └──────────────┘    └──────────────┘
 ```
+
+> **Status:** only `unity3d-mcp` currently implements a receiving `/api/v1/gazebo/import` endpoint. `resonite-mcp`, `yahboom-mcp`, and `freecad-mcp` do not yet have receiving endpoints, so `sync_to_resonite`/`sync_to_yahboom`/`sync_to_freecad` will fail against those repos as they stand today. See `mcp-central-docs/standards/GAZEBO_FLEET_BRIDGE_CONTRACT.md` for the shared contract these need to implement.
 
 | Repo | Port | Role |
 |------|------|------|
-| **gazebo-mcp** | — | Simulation bridge (this repo) |
+| **ag-gazebo-bridge** | 11179 (backend) / 11176 (dashboard) | Fleet sync bridge (this repo) |
+| gazebo-mcp | 10991 (backend) / 10990 (dashboard) | Simulation owner (worlds, jobs, physics) |
 | robotics-mcp | 10706 | Fleet orchestration |
 | yahboom-mcp | 10893 | Physical Yahboom robot control |
 | unity3d-mcp | 10831 | 3D visualization / render |
@@ -74,11 +77,11 @@ wsl sudo apt update && sudo apt install gz-garden
 wsl gz sim --version
 ```
 
-### 2. Install gazebo-mcp
+### 2. Install ag-gazebo-bridge
 
 ```powershell
-git clone https://github.com/sandraschi/gazebo-mcp.git
-cd gazebo-mcp
+git clone https://github.com/sandraschi/ag-gazebo-bridge.git
+cd ag-gazebo-bridge
 just install
 just install-mcp claude
 ```
@@ -89,7 +92,7 @@ just install-mcp claude
 just stdio           # MCP server only
 ```
 
-No web dashboard (it's a bridge, not a user-facing app). Use `just fleet` to check connected repos, `just sync-all` to broadcast sim state.
+There's also a read-only status dashboard at `web_sota/` (Vite dev server on `:11176`) that polls each fleet repo's own health endpoint from the browser — it's not a control surface, just a fleet-health view. Run it with `just dev` or `web_sota/start.ps1`. Use `just fleet` to check connected repos from the CLI, `just sync-all` to broadcast sim state.
 
 ## Tools
 

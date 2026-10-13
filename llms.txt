@@ -1,4 +1,4 @@
-# gazebo-mcp (ag-gazebo-bridge)
+# ag-gazebo-bridge
 
 > FastMCP 3.4 bridge from Gazebo robotics simulation to the fleet robotics mesh.  
 > Wraps `gz` CLI for topic publish, model listing, and service calls; syncs simulation state to yahboom-mcp, unity3d-mcp, resonite-mcp, and freecad-mcp.
@@ -23,6 +23,8 @@
 ## Ports
 | Service | Port |
 |---------|------|
+| ag-gazebo-bridge (this repo, backend) | 11179 |
+| ag-gazebo-bridge (this repo, dashboard) | 11176 |
 | robotics-mcp | 10706 |
 | yahboom-mcp | 10893 |
 | unity3d-mcp | 10831 |
