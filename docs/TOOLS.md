@@ -6,7 +6,7 @@
 
 ---
 
-## Sim Tools (1-9)
+## Sim Tools (1-11)
 
 ### sim_status
 
@@ -174,6 +174,56 @@ await apply_control(job_id="a1b2c3d4", topic="/model/vehicle/cmd_vel", command="
 
 ---
 
+### topic_list
+
+**Description:** List all active Gazebo topics in the running simulation (`gz topic -l`).
+Rescued from the retired ag-gazebo-bridge fork — previously no gazebo-mcp tool
+exposed topic discovery, though troubleshooting docs referenced the CLI directly.
+
+**Inputs:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| — | — | — | No parameters |
+
+**Output:**
+```json
+{"success": true, "topics": ["/model/vehicle/cmd_vel"], "count": 1}
+```
+
+**Examples:**
+```python
+await topic_list()
+```
+
+---
+
+### service_call
+
+**Description:** Call an arbitrary Gazebo service. `spawn_model` covers the common
+EntityFactory case; this is the escape hatch for delete/pause/custom services.
+Rescued from the retired ag-gazebo-bridge fork.
+
+**Inputs:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| service | str | Yes | Service name (e.g. `/world/default/create`) |
+| req_type | str | Yes | Request message type (e.g. `gz.msgs.EntityFactory`) |
+| rep_type | str | Yes | Response message type (e.g. `gz.msgs.Boolean`) |
+| request | str | Yes | Request payload string |
+| timeout | int | No | Reply timeout, ms (default 1000) |
+
+**Output:**
+```json
+{"success": true, "service": "/world/default/create", "output": ""}
+```
+
+**Examples:**
+```python
+await service_call(service="/world/default/create", req_type="gz.msgs.EntityFactory", rep_type="gz.msgs.Boolean", request="{sdf_filename: 'model.sdf', name: 'thrall'}")
+```
+
+---
+
 ### list_worlds
 
 **Description:** List all worlds in the depot with metadata.
@@ -216,7 +266,7 @@ await list_jobs()
 
 ---
 
-## AI Workflow Tools (10-14)
+## AI Workflow Tools (12-16)
 
 ### agentic_sim_workflow
 

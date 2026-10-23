@@ -117,7 +117,7 @@ def _detect_gz_version() -> str | None:
 
 
 # ---------------------------------------------------------------------------
-# Sim tools (1-9)
+# Sim tools (1-11)
 # ---------------------------------------------------------------------------
 
 
@@ -427,6 +427,91 @@ def apply_control(job_id: str, topic: str = "", command: str = "") -> dict:
         }
 
     return {"success": False, "error": "No topic specified"}
+
+
+@mcp.tool(annotations=_READ_ONLY)
+def topic_list() -> dict:
+    """List all active Gazebo topics in the running simulation.
+
+    Rescued from the retired ag-gazebo-bridge fork (its only peer-free
+    CLI tools with no gazebo-mcp equivalent).
+
+    ## Return Format
+    {"success": bool, "topics": list, "count": int}
+
+    ## Examples
+    topic_list()
+    """
+    gz = _find_gz()
+    if not gz:
+        return {"success": False, "error": "Gazebo (gz sim) not found on PATH"}
+    try:
+        result = subprocess.run(
+            [*gz, "topic", "-l"], capture_output=True, text=True, timeout=15
+        )
+    except subprocess.TimeoutExpired:
+        return {"success": False, "error": "Topic list timed out"}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+    if result.returncode != 0:
+        return {
+            "success": False,
+            "error": result.stderr.strip() or "gz topic -l failed",
+        }
+    topics = [t.strip() for t in result.stdout.splitlines() if t.strip()]
+    return {"success": True, "topics": topics, "count": len(topics)}
+
+
+@mcp.tool(annotations=_MUTATING)
+def service_call(
+    service: str, req_type: str, rep_type: str, request: str, timeout: int = 1000
+) -> dict:
+    """Call an arbitrary Gazebo service (spawn, delete, pause, custom).
+
+    Rescued from the retired ag-gazebo-bridge fork. spawn_model covers the
+    common EntityFactory case; this is the escape hatch for everything else.
+
+    service: service name (e.g. /world/default/create)
+    req_type: request message type (e.g. gz.msgs.EntityFactory)
+    rep_type: response message type (e.g. gz.msgs.Boolean)
+    request: request payload string
+    timeout: wait for reply, ms
+
+    ## Return Format
+    {"success": bool, "service": str, "output": str}
+
+    ## Examples
+    service_call(service="/world/default/create", req_type="gz.msgs.EntityFactory", rep_type="gz.msgs.Boolean", request="{sdf_filename: 'model.sdf', name: 'thrall'}")
+    """
+    gz = _find_gz()
+    if not gz:
+        return {"success": False, "error": "Gazebo (gz sim) not found on PATH"}
+    cmd = [
+        *gz,
+        "service",
+        service,
+        "--reqtype",
+        req_type,
+        "--reptype",
+        rep_type,
+        "--timeout",
+        str(timeout),
+        "--req",
+        request,
+    ]
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        return {
+            "success": result.returncode == 0,
+            "service": service,
+            "output": (
+                result.stdout if result.returncode == 0 else result.stderr
+            ).strip(),
+        }
+    except subprocess.TimeoutExpired:
+        return {"success": False, "error": "Service call timed out"}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 
 @mcp.tool(annotations=_READ_ONLY)

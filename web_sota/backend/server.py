@@ -27,6 +27,8 @@ from web_sota.backend.log_buffer import activity_log
 from web_sota.backend.routes.ai import router as ai_router
 from web_sota.backend.routes.fuel import router as fuel_router
 from web_sota.backend.routes.logging import router as logging_router
+from web_sota.backend.routes.mesh import router as mesh_router
+from web_sota.backend.routes.settings import router as settings_router
 
 _server_start_time = time.time()
 
@@ -62,6 +64,8 @@ app.add_middleware(
 app.include_router(ai_router)
 app.include_router(logging_router)
 app.include_router(fuel_router)
+app.include_router(mesh_router)
+app.include_router(settings_router)
 
 _SKILLS_DIR = Path(__file__).resolve().parents[2] / "src" / "gazebo_mcp" / "skills"
 
@@ -94,7 +98,7 @@ async def health():
         "server": "gazebo-mcp",
         "version": "0.2.0",
         "uptime_seconds": int(time.time() - _server_start_time),
-        "tool_count": 14,
+        "tool_count": 17,
         **status,
     }
 
@@ -107,7 +111,7 @@ async def diagnostics():
         "server": "gazebo-mcp",
         "version": "0.2.0",
         "uptime_seconds": int(time.time() - _server_start_time),
-        "tool_count": 15,
+        "tool_count": 17,
         "tools": [
             {"name": "sim_status"},
             {"name": "load_world"},
@@ -116,6 +120,8 @@ async def diagnostics():
             {"name": "stop_sim"},
             {"name": "get_state"},
             {"name": "apply_control"},
+            {"name": "topic_list"},
+            {"name": "service_call"},
             {"name": "list_worlds"},
             {"name": "list_jobs"},
             {"name": "agentic_sim_workflow"},
@@ -142,7 +148,7 @@ async def capabilities():
         "service": "gazebo-mcp",
         "version": "0.2.0",
         "status": "ok",
-        "tool_count": 15,
+        "tool_count": 17,
         "tools": [
             "sim_status",
             "load_world",
@@ -151,6 +157,8 @@ async def capabilities():
             "stop_sim",
             "get_state",
             "apply_control",
+            "topic_list",
+            "service_call",
             "list_worlds",
             "list_jobs",
             "agentic_sim_workflow",
