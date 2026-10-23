@@ -6,7 +6,7 @@
 
 ---
 
-## Sim Tools (1-11)
+## Sim Tools (1-13)
 
 ### sim_status
 
@@ -224,6 +224,50 @@ await service_call(service="/world/default/create", req_type="gz.msgs.EntityFact
 
 ---
 
+### delete_world
+
+**Description:** Delete a world from the depot (registry entry + SDF file).
+Refuses while a live sim job runs on that world.
+
+**Inputs:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| name | str | Yes | Depot world name |
+
+**Output:**
+```json
+{"success": true, "name": "old_world"}
+```
+
+**Examples:**
+```python
+await delete_world(name="old_world")
+```
+
+---
+
+### rename_world
+
+**Description:** Rename a depot world (registry key + SDF file on disk).
+
+**Inputs:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| old_name | str | Yes | Current depot name |
+| new_name | str | Yes | Desired depot name |
+
+**Output:**
+```json
+{"success": true, "old_name": "empty_world", "new_name": "empty_baseline"}
+```
+
+**Examples:**
+```python
+await rename_world(old_name="empty_world", new_name="empty_baseline")
+```
+
+---
+
 ### list_worlds
 
 **Description:** List all worlds in the depot with metadata.
@@ -266,7 +310,7 @@ await list_jobs()
 
 ---
 
-## AI Workflow Tools (12-16)
+## AI Workflow Tools (14-18)
 
 ### agentic_sim_workflow
 

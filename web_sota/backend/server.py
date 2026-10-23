@@ -14,17 +14,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from gazebo_mcp.server import (
+    delete_world,
     get_state,
     list_jobs,
     list_worlds,
     load_world,
     mcp,
+    rename_world,
     sim_status,
     start_sim,
     stop_sim,
 )
 from web_sota.backend.log_buffer import activity_log
 from web_sota.backend.routes.ai import router as ai_router
+from web_sota.backend.routes.demos import router as demos_router
 from web_sota.backend.routes.fuel import router as fuel_router
 from web_sota.backend.routes.logging import router as logging_router
 from web_sota.backend.routes.mesh import router as mesh_router
@@ -66,6 +69,7 @@ app.include_router(logging_router)
 app.include_router(fuel_router)
 app.include_router(mesh_router)
 app.include_router(settings_router)
+app.include_router(demos_router)
 
 _SKILLS_DIR = Path(__file__).resolve().parents[2] / "src" / "gazebo_mcp" / "skills"
 
@@ -98,7 +102,7 @@ async def health():
         "server": "gazebo-mcp",
         "version": "0.2.0",
         "uptime_seconds": int(time.time() - _server_start_time),
-        "tool_count": 17,
+        "tool_count": 19,
         **status,
     }
 
@@ -111,7 +115,7 @@ async def diagnostics():
         "server": "gazebo-mcp",
         "version": "0.2.0",
         "uptime_seconds": int(time.time() - _server_start_time),
-        "tool_count": 17,
+        "tool_count": 19,
         "tools": [
             {"name": "sim_status"},
             {"name": "load_world"},
@@ -122,6 +126,8 @@ async def diagnostics():
             {"name": "apply_control"},
             {"name": "topic_list"},
             {"name": "service_call"},
+            {"name": "delete_world"},
+            {"name": "rename_world"},
             {"name": "list_worlds"},
             {"name": "list_jobs"},
             {"name": "agentic_sim_workflow"},
@@ -148,7 +154,7 @@ async def capabilities():
         "service": "gazebo-mcp",
         "version": "0.2.0",
         "status": "ok",
-        "tool_count": 17,
+        "tool_count": 19,
         "tools": [
             "sim_status",
             "load_world",
@@ -159,6 +165,8 @@ async def capabilities():
             "apply_control",
             "topic_list",
             "service_call",
+            "delete_world",
+            "rename_world",
             "list_worlds",
             "list_jobs",
             "agentic_sim_workflow",
@@ -215,6 +223,18 @@ async def sim_state(job_id: str):
 async def world_load(body: dict):
     return await asyncio.to_thread(
         load_world, uri=body.get("uri", ""), name=body.get("name", "")
+    )
+
+
+@app.delete("/api/worlds/{world_name}")
+async def world_delete(world_name: str):
+    return delete_world(name=world_name)
+
+
+@app.post("/api/worlds/rename")
+async def world_rename(body: dict):
+    return rename_world(
+        old_name=body.get("old_name", ""), new_name=body.get("new_name", "")
     )
 
 

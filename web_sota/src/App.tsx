@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
 import { useZoom } from "./lib/use-zoom";
 import Dashboard from "./pages/Dashboard";
 import Simulations from "./pages/Simulations";
+import Demos from "./pages/Demos";
+import Downloads from "./pages/Downloads";
 import Models from "./pages/Models";
 import Skills from "./pages/Skills";
 import Logging from "./pages/Logging";
@@ -13,7 +15,9 @@ import FloatingChat from "./components/FloatingChat";
 const navItems = [
   { to: "/", label: "Dashboard", icon: "\u{1F3E0}" },
   { to: "/simulations", label: "Simulations", icon: "\u{1F3AE}" },
+  { to: "/demos", label: "Demos", icon: "\u{1F9EA}" },
   { to: "/models", label: "Worlds", icon: "\u{1F4E6}" },
+  { to: "/downloads", label: "Downloads", icon: "\u{2B07}\uFE0F" },
   { to: "/skills", label: "Skills", icon: "\u{1F4D6}" },
   { to: "/logging", label: "Logging", icon: "\u{1F4CA}" },
   { to: "/llm", label: "LLM", icon: "\u{1F916}" },
@@ -58,7 +62,9 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/simulations" element={<Simulations />} />
+            <Route path="/demos" element={<Demos />} />
             <Route path="/models" element={<Models />} />
+            <Route path="/downloads" element={<Downloads />} />
             <Route path="/skills" element={<Skills />} />
             <Route path="/logging" element={<Logging />} />
             <Route path="/llm" element={<LLM />} />

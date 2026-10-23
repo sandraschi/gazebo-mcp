@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const TABS = ["Newbie start here", "Tools", "Setup", "Troubleshooting"];
+const TABS = ["Newbie start here", "Gazebo online", "Fleet worlds", "Tools", "Setup", "Troubleshooting"];
 
 const TOOLS = [
   { name: "sim_status", desc: "Health check — Gazebo CLI availability, version, depot stats", group: "Core Sim" },
@@ -12,6 +12,8 @@ const TOOLS = [
   { name: "apply_control", desc: "Publish a command to a Gazebo topic via gz topic", group: "Core Sim" },
   { name: "topic_list", desc: "List all active Gazebo topics via gz topic -l", group: "Core Sim" },
   { name: "service_call", desc: "Call an arbitrary Gazebo service (spawn, delete, pause)", group: "Core Sim" },
+  { name: "delete_world", desc: "Delete a world from the depot (refuses if a live job uses it)", group: "Core Sim" },
+  { name: "rename_world", desc: "Rename a depot world (registry + file)", group: "Core Sim" },
   { name: "list_worlds", desc: "List all worlds in the depot", group: "Core Sim" },
   { name: "list_jobs", desc: "List active and completed simulation jobs", group: "Core Sim" },
   { name: "agentic_sim_workflow", desc: "Multi-step simulation orchestration via host LLM", group: "AI Workflow" },
@@ -52,9 +54,11 @@ export default function Help() {
         ))}
       </div>
       {tab === 0 && <Newbie />}
-      {tab === 1 && <Tools />}
-      {tab === 2 && <Setup />}
-      {tab === 3 && <Troubleshooting />}
+      {tab === 1 && <GazeboOnline />}
+      {tab === 2 && <FleetWorlds />}
+      {tab === 3 && <Tools />}
+      {tab === 4 && <Setup />}
+      {tab === 5 && <Troubleshooting />}
     </div>
   );
 }
@@ -179,12 +183,138 @@ Gazebo (Ignition) simulator
   );
 }
 
+const GAZEBO_LINKS: { group: string; links: { label: string; url: string; note: string }[] }[] = [
+  {
+    group: "Official",
+    links: [
+      { label: "gazebosim.org", url: "https://gazebosim.org", note: "Home — releases Garden / Harmonic, install guides." },
+      { label: "Documentation", url: "https://gazebosim.org/docs", note: "Versioned tutorials, pick Garden or Harmonic." },
+      { label: "Fuel — free models & worlds", url: "https://app.gazebosim.org/fuel", note: "Apache/CC assets. Search here, paste URLs on the Downloads page." },
+      { label: "SDFormat spec", url: "http://sdformat.org", note: "The .sdf file format reference (links, joints, plugins)." },
+    ],
+  },
+  {
+    group: "GitHub",
+    links: [
+      { label: "gazebosim (org)", url: "https://github.com/gazebosim", note: "Every gz-* library lives here." },
+      { label: "gz-sim", url: "https://github.com/gazebosim/gz-sim", note: "The simulator. Examples folder has free .sdf worlds." },
+      { label: "sdformat", url: "https://github.com/gazebosim/sdformat", note: "Parser + spec tooling." },
+      { label: "ros_gz bridge", url: "https://github.com/gazebosim/ros_gz", note: "Gazebo ↔ ROS 2 topic/service bridge." },
+      { label: "Classic gazebo_models", url: "https://github.com/osrf/gazebo_models", note: "Hundreds of free SDF models (Gazebo Classic era, mostly loadable)." },
+    ],
+  },
+  {
+    group: "Community",
+    links: [
+      { label: "Gazebo Answers", url: "https://answers.gazebosim.org", note: "Q&A archive — search before asking, most errors are answered." },
+      { label: "Robotics Stack Exchange (gazebo tag)", url: "https://robotics.stackexchange.com/questions/tagged/gazebo", note: "Active successor venue for how-to questions." },
+      { label: "gz-sim Discussions", url: "https://github.com/gazebosim/gz-sim/discussions", note: "Ask the maintainers directly." },
+    ],
+  },
+];
+
+function GazeboOnline() {
+  return (
+    <div className="space-y-4">
+      <Card title="Gazebo on the web">
+        <p className="text-sm text-slate-300 mb-4">
+          The simulator is a big open-source project (Open Robotics). Everything below is free —
+          bookmark Fuel and the docs, they are the two you will actually use weekly.
+        </p>
+        {GAZEBO_LINKS.map((g) => (
+          <div key={g.group} className="mb-4">
+            <div className="text-xs font-semibold text-cyan-300 uppercase tracking-wider mb-2">{g.group}</div>
+            <div className="space-y-2">
+              {g.links.map((l) => (
+                <div key={l.url} className="bg-slate-900/60 rounded-lg p-3 border border-slate-700">
+                  <a href={l.url} target="_blank" rel="noreferrer" className="text-sm font-medium text-cyan-300 hover:underline">
+                    {l.label} →
+                  </a>
+                  <div className="text-xs text-slate-500 font-mono break-all">{l.url}</div>
+                  <div className="text-xs text-slate-400 mt-0.5">{l.note}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </Card>
+    </div>
+  );
+}
+
+const FLEET_ENVS: { repo: string; kind: string; fe: number | null; be: number | null; blurb: string }[] = [
+  { repo: "gazebo-mcp", kind: "Physics sim", fe: 10990, be: 10991, blurb: "This repo — Gazebo Garden/Harmonic, SDF depot, isolated jobs." },
+  { repo: "mujoco-mcp", kind: "Physics sim", fe: 11047, be: 11046, blurb: "Lightweight MuJoCo, Menagerie incl. Unitree Go2/H1." },
+  { repo: "isaac-mcp", kind: "GPU sim", fe: 11048, be: 11049, blurb: "NVIDIA Isaac Sim/Lab, GPU sensors." },
+  { repo: "ros-mcp", kind: "Bridge", fe: 11051, be: 11050, blurb: "ROS 2 topics/services/params/bags bridge." },
+  { repo: "simbench-mcp", kind: "Benchmark", fe: 11085, be: 11084, blurb: "Cross-simulator benchmark layer." },
+  { repo: "vla-mcp", kind: "VLA", fe: 11025, be: 11024, blurb: "Vision-language-action bridge (WALL-X)." },
+  { repo: "robotics-mcp", kind: "Orchestration", fe: 10706, be: 11199, blurb: "Generic fleet robotics orchestration." },
+  { repo: "unitree-mcp", kind: "Robot", fe: 11053, be: 11052, blurb: "Unitree Go2 / H1 quadruped + humanoid." },
+  { repo: "limx-robotics-mcp", kind: "Robot", fe: 11045, be: 11044, blurb: "LimX biped/humanoid + VLA bridge." },
+  { repo: "yahboom-mcp", kind: "Robot", fe: 10893, be: 10892, blurb: "Yahboom ROSMASTER physical rover." },
+  { repo: "norirobotics-mcp", kind: "Robot", fe: 11971, be: 11970, blurb: "Nori SDK / WebRTC bridge." },
+  { repo: "unity3d-mcp", kind: "Render", fe: 10830, be: 10831, blurb: "Unity 3D visualization / rendering." },
+  { repo: "godot-mcp", kind: "Game engine", fe: 10992, be: 10993, blurb: "Godot engine bridge." },
+  { repo: "blender-mcp", kind: "3D content", fe: 10848, be: 10849, blurb: "Blender modeling/render bridge." },
+  { repo: "overte-mcp", kind: "VR", fe: 11110, be: 11111, blurb: "Overte open virtual worlds." },
+  { repo: "resonite-mcp", kind: "VR", fe: 10978, be: 10979, blurb: "Resonite VR spatial sync." },
+  { repo: "vrchat-mcp", kind: "Social VR", fe: 10712, be: null, blurb: "VRChat dashboard." },
+  { repo: "worldlabs-mcp", kind: "World gen", fe: 10864, be: 10865, blurb: "Marble world generation." },
+  { repo: "ai-games-collection", kind: "Games", fe: 10986, be: 10987, blurb: "Chess/shogi/go/othello engines + dashboard." },
+];
+
+function FleetWorlds() {
+  return (
+    <Card title="Fleet virtual / sim / game environments">
+      <p className="text-sm text-slate-300 mb-4">
+        Every world you can send a robot (or yourself) into, and where its dashboard lives when it is running.
+        GitHub: <code className="text-xs bg-slate-700 px-1 rounded font-mono">github.com/sandraschi/&lt;repo&gt;</code>.
+      </p>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-slate-700 text-left text-slate-400">
+              <th className="pb-2 pr-3 font-medium">Repo</th>
+              <th className="pb-2 pr-3 font-medium">Kind</th>
+              <th className="pb-2 pr-3 font-medium">Dashboard</th>
+              <th className="pb-2 font-medium">What it is</th>
+            </tr>
+          </thead>
+          <tbody>
+            {FLEET_ENVS.map((e) => (
+              <tr key={e.repo} className="border-b border-slate-700 align-top">
+                <td className="py-2 pr-3">
+                  <a
+                    href={`https://github.com/sandraschi/${e.repo}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs font-mono text-cyan-300 hover:underline whitespace-nowrap"
+                  >
+                    {e.repo} →
+                  </a>
+                </td>
+                <td className="py-2 pr-3 text-xs text-slate-400 whitespace-nowrap">{e.kind}</td>
+                <td className="py-2 pr-3 text-xs font-mono text-slate-400 whitespace-nowrap">
+                  {e.fe ? <a href={`http://127.0.0.1:${e.fe}`} target="_blank" rel="noreferrer" className="text-cyan-300 hover:underline">:{e.fe}</a> : "—"}
+                </td>
+                <td className="py-2 text-xs text-slate-300">{e.blurb}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="text-xs text-slate-500 mt-3">Dashboards answer only while that repo's backend is running — start peers from the Dashboard mesh panel.</p>
+    </Card>
+  );
+}
+
 function Tools() {
   const sim = TOOLS.filter((t) => t.group === "Core Sim");
   const ai = TOOLS.filter((t) => t.group === "AI Workflow");
   return (
     <div className="space-y-4">
-      <Card title="Core Simulation Tools (11)">
+      <Card title="Core Simulation Tools (13)">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

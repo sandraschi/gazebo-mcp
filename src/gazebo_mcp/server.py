@@ -117,7 +117,7 @@ def _detect_gz_version() -> str | None:
 
 
 # ---------------------------------------------------------------------------
-# Sim tools (1-11)
+# Sim tools (1-13)
 # ---------------------------------------------------------------------------
 
 
@@ -572,6 +572,85 @@ def list_jobs() -> dict:
         "completed": completed,
         "total": len(active) + len(completed),
     }
+
+
+@mcp.tool(annotations=_DESTRUCTIVE)
+def delete_world(name: str) -> dict:
+    """Delete a world from the depot (registry entry + SDF file).
+
+    Refuses while a live sim job is running on that world — stop it first.
+
+    name: depot world name
+
+    ## Return Format
+    {"success": bool, "name": str}
+
+    ## Examples
+    delete_world(name="old_world")
+    """
+    depot = _load_depot()
+    if name not in depot:
+        return {"success": False, "error": f"World '{name}' not in depot"}
+    running = [
+        jid
+        for jid, info in _jobs.items()
+        if info.get("world_name") == name
+        and info.get("process") is not None
+        and info["process"].poll() is None
+    ]
+    if running:
+        return {
+            "success": False,
+            "error": f"World '{name}' is in use by running job(s): {running}. Stop them first.",
+        }
+    entry = depot.pop(name)
+    _save_depot(depot)
+    try:
+        p = Path(entry.get("path", ""))
+        if p.is_file() and WORLD_DIR in p.resolve().parents:
+            p.unlink()
+    except Exception:
+        pass
+    return {"success": True, "name": name}
+
+
+@mcp.tool(annotations=_MUTATING)
+def rename_world(old_name: str, new_name: str) -> dict:
+    """Rename a depot world (registry key + SDF file on disk).
+
+    old_name: current depot name
+    new_name: desired depot name (letters, digits, _)
+
+    ## Return Format
+    {"success": bool, "old_name": str, "new_name": str}
+
+    ## Examples
+    rename_world(old_name="empty_world", new_name="empty_baseline")
+    """
+    import re as _re
+
+    depot = _load_depot()
+    if old_name not in depot:
+        return {"success": False, "error": f"World '{old_name}' not in depot"}
+    clean = _re.sub(r"[^A-Za-z0-9_]+", "_", new_name).strip("_")
+    if not clean:
+        return {"success": False, "error": "New name is empty after sanitizing"}
+    if clean in depot:
+        return {"success": False, "error": f"World '{clean}' already exists"}
+    entry = depot.pop(old_name)
+    try:
+        p = Path(entry.get("path", ""))
+        if p.is_file() and WORLD_DIR in p.resolve().parents:
+            target = p.with_name(f"{clean}.sdf")
+            p.rename(target)
+            entry["path"] = str(target)
+    except Exception as e:
+        depot[old_name] = entry
+        _save_depot(depot)
+        return {"success": False, "error": f"Rename failed: {e}"}
+    depot[clean] = entry
+    _save_depot(depot)
+    return {"success": True, "old_name": old_name, "new_name": clean}
 
 
 # ---------------------------------------------------------------------------
